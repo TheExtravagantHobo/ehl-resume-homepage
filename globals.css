@@ -1,7 +1,6 @@
-// globals.css
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* app/globals.css */
+@import "tailwindcss/preflight";
+@import "tailwindcss/utilities";
 
 @layer base {
   :root {
@@ -15,10 +14,9 @@
   }
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+/* Custom utilities */
+.text-balance {
+  text-wrap: balance;
 }
 
 /* Custom scrollbar */
@@ -39,26 +37,16 @@
   @apply bg-gray-500 dark:bg-gray-500;
 }
 
-// types/next-auth.d.ts
-import NextAuth from "next-auth"
-
-declare module "next-auth" {
-  interface Session {
-    user: {
-      id: string
-      email: string
-    }
+/* Animation keyframes */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
   }
-
-  interface User {
-    id: string
-    email: string
+  50% {
+    opacity: .5;
   }
 }
 
-declare module "next-auth/jwt" {
-  interface JWT {
-    id: string
-    email: string
-  }
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
