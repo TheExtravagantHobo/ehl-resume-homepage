@@ -1,0 +1,78 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Resume {
+  id            String    @id @default(cuid())
+  name          String
+  title         String
+  bio           String?
+  photoUrl      String?
+  email         String
+  signalUrl     String?
+  linkedinPersonal String?
+  linkedinBusiness String?
+  theme         String    @default("light-modern")
+  showMission   Boolean   @default(false)
+  missionTitle  String?
+  missionText   String?
+  updatedAt     DateTime  @updatedAt
+}
+
+model Education {
+  id            String    @id @default(cuid())
+  schoolName    String
+  degree        String
+  major         String
+  location      String
+  yearsAttended String
+  order         Int
+}
+
+model Experience {
+  id            String    @id @default(cuid())
+  dateRange     String
+  jobTitle      String
+  company       String
+  duties        String[]  // 3 short duties
+  fullBullets   String[]  // All bullets for expanded view
+  order         Int
+}
+
+model Skill {
+  id            String    @id @default(cuid())
+  name          String
+  level         Int       // 1-10
+  hoverText     String?   // "5 years" or "Expert"
+  order         Int
+}
+
+model Publication {
+  id            String    @id @default(cuid())
+  title         String
+  year          String
+  order         Int
+}
+
+model Language {
+  id            String    @id @default(cuid())
+  name          String
+  proficiency   String
+  order         Int
+}
