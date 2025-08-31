@@ -1,6 +1,6 @@
 // app/signin/page.tsx
 'use client'
-export const dynamic = 'force-dynamic'
+
 import { Suspense } from 'react'
 import { useState } from 'react'
 import { signIn } from 'next-auth/react'
@@ -8,7 +8,8 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { Lock, Mail, AlertCircle, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 
-// Separate component that uses useSearchParams
+export const dynamic = 'force-dynamic'
+
 function SignInForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -46,15 +47,83 @@ function SignInForm() {
 
   return (
     <div className="bg-slate-800 rounded-2xl shadow-2xl p-8">
-      {/* Your existing form JSX here */}
+      <div className="flex items-center justify-center w-12 h-12 bg-purple-600 rounded-full mx-auto mb-6">
+        <Lock className="text-white" size={24} />
+      </div>
+
+      <h2 className="text-2xl font-bold text-white text-center mb-6">Sign In</h2>
+
+      {error && (
+        <div className="bg-red-900/50 border border-red-500 text-red-200 px-4 py-3 rounded-lg mb-6 flex items-start gap-2">
+          <AlertCircle size={20} className="flex-shrink-0 mt-0.5" />
+          <span className="text-sm">{error}</span>
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* ... rest of your form ... */}
+        <div>
+          <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
+            Email Address
+          </label>
+          <div className="relative">
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full px-4 py-3 pl-11 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+              placeholder="admin@theextravaganthobo.com"
+              disabled={loading}
+            />
+            <Mail className="absolute left-3 top-3.5 text-gray-400" size={20} />
+          </div>
+        </div>
+
+        <div>
+          <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
+            Password
+          </label>
+          <div className="relative">
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="w-full px-4 py-3 pl-11 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+              placeholder="••••••••"
+              disabled={loading}
+            />
+            <Lock className="absolute left-3 top-3.5 text-gray-400" size={20} />
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full py-3 px-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-medium rounded-lg hover:from-purple-700 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2"
+        >
+          {loading ? (
+            <>
+              <Loader2 className="animate-spin" size={20} />
+              Signing In...
+            </>
+          ) : (
+            'Sign In'
+          )}
+        </button>
       </form>
+
+      <div className="mt-6 text-center">
+        <Link href="/" className="text-sm text-gray-400 hover:text-purple-400 transition-colors">
+          ← Back to Home
+        </Link>
+      </div>
     </div>
   )
 }
 
-// Main page component with Suspense
 export default function SignInPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center px-4">
@@ -70,11 +139,15 @@ export default function SignInPage() {
 
         <Suspense fallback={
           <div className="bg-slate-800 rounded-2xl shadow-2xl p-8 text-center">
-            <Loader2 className="animate-spin mx-auto" size={24} />
+            <Loader2 className="animate-spin mx-auto text-white" size={24} />
           </div>
         }>
           <SignInForm />
         </Suspense>
+
+        <p className="text-center text-gray-500 text-xs mt-6">
+          This is a secure area. Only authorized administrators can access.
+        </p>
       </div>
     </div>
   )
