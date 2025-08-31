@@ -121,7 +121,7 @@ export default function ResumePage() {
   const [experienceRef, experienceInView] = useInView({ triggerOnce: true, threshold: 0.1 })
 
   // Mock data - will be replaced with API call
-  useEffect(() => {
+useEffect(() => {
   const fetchResumeData = async () => {
     try {
       const response = await fetch('/api/resume')

@@ -1,4 +1,3 @@
-
 // lib/auth.ts
 import { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
@@ -42,7 +41,8 @@ export const authOptions: NextAuthOptions = {
     })
   ],
   pages: {
-    signIn: '/admin',
+    signIn: '/api/auth/signin',
+    error: '/api/auth/signin',
   },
   callbacks: {
     async jwt({ token, user }) {

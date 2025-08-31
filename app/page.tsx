@@ -1,8 +1,13 @@
 // app/page.tsx
+'use client'
+
 import Link from 'next/link'
-import { ArrowRight, FileText, Briefcase, Mail } from 'lucide-react'
+import { ArrowRight, FileText, Briefcase, Mail, Settings } from 'lucide-react'
+import { useSession, signIn, signOut } from 'next-auth/react'
 
 export default function LandingPage() {
+  const { data: session, status } = useSession()
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
       {/* Navigation */}
@@ -27,6 +32,31 @@ export default function LandingPage() {
                 <Mail size={18} />
                 Contact
               </Link>
+              
+              {/* Admin Link - shows different states based on auth */}
+              {status === 'loading' ? (
+                <span className="text-gray-400 text-sm">...</span>
+              ) : session ? (
+                <div className="flex items-center gap-4 border-l pl-8 ml-4 border-gray-300 dark:border-gray-700">
+                  <Link href="/admin" className="text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors flex items-center gap-2">
+                    <Settings size={18} />
+                    Admin
+                  </Link>
+                  <button
+                    onClick={() => signOut()}
+                    className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 text-sm"
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => signIn()}
+                  className="text-gray-500 dark:text-gray-500 hover:text-purple-600 dark:hover:text-purple-400 text-sm transition-colors"
+                >
+                  Admin
+                </button>
+              )}
             </div>
           </div>
         </div>

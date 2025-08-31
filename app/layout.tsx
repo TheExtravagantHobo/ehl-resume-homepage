@@ -7,19 +7,8 @@ import { Providers } from '@/components/Providers'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'The Extravagant Hobo - Alex Sonne',
+  title: 'The Extravagant Hobo',
   description: 'Alex Sonne - Strategic Leader in Technology and Policy',
-  metadataBase: new URL('https://www.theextravaganthobo.com'),
-  openGraph: {
-    title: 'The Extravagant Hobo - Alex Sonne',
-    description: 'Strategic leader bridging technology and policy with expertise in AI/ML, defense tech, and innovation management.',
-    url: 'https://www.theextravaganthobo.com',
-    siteName: 'The Extravagant Hobo',
-    type: 'website',
-  },
-  alternates: {
-    canonical: 'https://www.theextravaganthobo.com',
-  },
 }
 
 export default function RootLayout({

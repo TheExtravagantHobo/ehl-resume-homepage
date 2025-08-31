@@ -1,26 +1,72 @@
+/* app/globals.css */
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* Global form input styles for better readability */
+input, textarea, select {
+  color: rgb(17 24 39); /* gray-900 - ensures dark text */
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+input::placeholder, 
+textarea::placeholder {
+  color: rgb(107 114 128); /* gray-500 - visible but not too dark */
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Ensure labels are always readable */
+label {
+  color: rgb(55 65 81); /* gray-700 */
+  font-weight: 500;
+}
+
+/* Focus states for better accessibility */
+input:focus, 
+textarea:focus, 
+select:focus {
+  outline: 2px solid rgb(147 51 234); /* purple-600 */
+  outline-offset: 2px;
+}
+
+/* Custom utilities */
+.text-balance {
+  text-wrap: balance;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgb(243 244 246); /* gray-100 */
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: rgb(31 41 55); /* gray-800 */
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgb(156 163 175); /* gray-400 */
+  border-radius: 9999px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgb(75 85 99); /* gray-600 */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(107 114 128); /* gray-500 */
+}
+
+/* Animation keyframes */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: .5;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
