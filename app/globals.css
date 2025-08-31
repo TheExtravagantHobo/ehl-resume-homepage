@@ -3,23 +3,24 @@
 
 /* Global form input styles for better readability */
 input, textarea, select {
-  color: rgb(17 24 39); /* gray-900 - ensures dark text */
+  color: rgb(17 24 39);
 }
 
 input::placeholder, 
 textarea::placeholder {
-  color: rgb(107 114 128); /* gray-500 - visible but not too dark */
+  color: rgb(107 114 128);
 }
 
-/* Ensure labels are always readable */
 label {
-  color: rgb(55 65 81); /* gray-700 */
+  color: rgb(55 65 81);
   font-weight: 500;
 }
 
+/* Rest of your custom CSS... */
+
 /* Focus states for better accessibility */
-input:focus, 
-textarea:focus, 
+input:focus,
+textarea:focus,
 select:focus {
   outline: 2px solid rgb(147 51 234); /* purple-600 */
   outline-offset: 2px;
