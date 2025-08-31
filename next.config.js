@@ -1,8 +1,12 @@
-// next.config.js
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ['localhost', 'theextravaganthobo.com', 'admin.theextravaganthobo.com'],
+    domains: [
+      'localhost',
+      'www.theextravaganthobo.com',
+      'theextravaganthobo.com', 
+      'admin.theextravaganthobo.com'
+    ],
   },
   async rewrites() {
     return [
@@ -15,6 +19,21 @@ const nextConfig = {
             value: 'admin.theextravaganthobo.com',
           },
         ],
+      },
+    ]
+  },
+  async redirects() {
+    return [
+      {
+        source: '/:path*',
+        has: [
+          {
+            type: 'host',
+            value: 'theextravaganthobo.com',
+          },
+        ],
+        destination: 'https://www.theextravaganthobo.com/:path*',
+        permanent: true,
       },
     ]
   },
