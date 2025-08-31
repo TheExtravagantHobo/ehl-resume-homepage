@@ -9,11 +9,11 @@ const inter = Inter({ subsets: ['latin'] })
 export const metadata: Metadata = {
   title: 'Alex Sonne - The Extravagant Hobo',
   description: 'Strategic leader bridging technology and policy with expertise in AI/ML, defense tech, and innovation management.',
-  metadataBase: new URL('https://www.theextravaganthobo.com/resume'),
+  metadataBase: new URL('https://www.theextravaganthobo.com/'),
   openGraph: {
     title: 'Alex Sonne - Strategic Leader in Technology and Policy',
     description: 'Strategic leader bridging technology and policy with expertise in AI/ML, defense tech, and innovation management.',
-    url: 'https://www.theextravaganthobo.com/resume',
+    url: 'https://www.theextravaganthobo.com/',
     siteName: 'The Extravagant Hobo',
     images: [
       {
