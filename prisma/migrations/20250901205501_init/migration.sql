@@ -45,12 +45,19 @@ CREATE TABLE "Education" (
 -- CreateTable
 CREATE TABLE "Experience" (
     "id" TEXT NOT NULL,
-    "dateRange" TEXT NOT NULL,
     "jobTitle" TEXT NOT NULL,
     "company" TEXT NOT NULL,
     "duties" TEXT[],
     "fullBullets" TEXT[],
     "workLocation" TEXT,
+    "startDate" TIMESTAMP(3) NOT NULL,
+    "endDate" TIMESTAMP(3),
+    "isCurrent" BOOLEAN NOT NULL DEFAULT false,
+    "dateRange" TEXT NOT NULL,
+    "street" TEXT,
+    "city" TEXT,
+    "state" TEXT,
+    "zipCode" TEXT,
     "order" INTEGER NOT NULL,
 
     CONSTRAINT "Experience_pkey" PRIMARY KEY ("id")
@@ -85,6 +92,24 @@ CREATE TABLE "Language" (
     "order" INTEGER NOT NULL,
 
     CONSTRAINT "Language_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Article" (
+    "id" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "subtitle" TEXT,
+    "excerpt" TEXT NOT NULL,
+    "url" TEXT NOT NULL,
+    "ogImageUrl" TEXT,
+    "publishedDate" TIMESTAMP(3) NOT NULL,
+    "readTime" TEXT,
+    "tags" TEXT[],
+    "order" INTEGER NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Article_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex

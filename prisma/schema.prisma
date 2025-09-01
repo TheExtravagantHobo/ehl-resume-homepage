@@ -47,12 +47,21 @@ model Education {
 
 model Experience {
   id            String    @id @default(cuid())
-  dateRange     String
   jobTitle      String
   company       String
   duties        String[]  // 3 short duties
   fullBullets   String[]  // All bullets for expanded view
   workLocation  String?   // "remote", "hybrid", or null for in-person
+  // New date fields
+  startDate     DateTime  // Full start date
+  endDate       DateTime? // Full end date (null if current)
+  isCurrent     Boolean   @default(false)
+  dateRange     String    // Keep for backward compatibility, will compute from dates
+  // New address fields (not displayed on resume)
+  street        String?
+  city          String?
+  state         String?
+  zipCode       String?
   order         Int
 }
 
@@ -77,4 +86,19 @@ model Language {
   name          String
   proficiency   String
   order         Int
+}
+
+model Article {
+  id            String    @id @default(cuid())
+  title         String
+  subtitle      String?
+  excerpt       String    @db.Text
+  url           String
+  ogImageUrl    String?   // Open Graph image URL
+  publishedDate DateTime
+  readTime      String?   // e.g., "8 min"
+  tags          String[]  // Array of tags
+  order         Int       // For manual ordering
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }

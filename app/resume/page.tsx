@@ -22,12 +22,15 @@ import Link from 'next/link'
 // Types
 interface Experience {
   id: string
-  dateRange: string
+  dateRange?: string  // Keep for compatibility
   jobTitle: string
   company: string
   duties: string[]
   fullBullets: string[]
   workLocation?: string | null
+  startDate?: string
+  endDate?: string | null
+  isCurrent?: boolean
 }
 
 interface Education {
@@ -68,6 +71,27 @@ const theme = {
   border: 'border-slate-700',
   timeline: 'bg-slate-600',
   dot: 'bg-purple-500',
+}
+
+// Helper function to format date range
+const formatDateRange = (exp: Experience): string => {
+  // First priority: use dateRange if it exists
+  if (exp.dateRange) return exp.dateRange
+  
+  // Second priority: calculate from dates
+  if (exp.startDate) {
+    const startYear = new Date(exp.startDate).getFullYear()
+    if (exp.isCurrent) {
+      return `${startYear} - Present`
+    } else if (exp.endDate) {
+      const endYear = new Date(exp.endDate).getFullYear()
+      return startYear === endYear ? `${startYear}` : `${startYear} - ${endYear}`
+    }
+    return `${startYear}`
+  }
+  
+  // Fallback
+  return ''
 }
 
 export default function ResumePage() {
@@ -360,7 +384,7 @@ export default function ResumePage() {
                   
                   <div className={`${theme.card} p-4 rounded-lg shadow-md hover:shadow-lg transition-all hover:scale-105 cursor-pointer`}
                        onClick={() => setSelectedExperience(exp.id)}>
-                    <p className={`${theme.subtext} text-xs mb-1`}>{exp.dateRange}</p>
+                    <p className={`${theme.subtext} text-xs mb-1`}>{formatDateRange(exp)}</p>
                     <h3 className={`font-bold ${theme.text}`}>{exp.jobTitle}</h3>
                     <div className="flex items-center gap-2 mb-2">
                       <p className={`${theme.subtext} text-sm`}>{exp.company}</p>
@@ -425,7 +449,7 @@ export default function ResumePage() {
                           </span>
                         )}
                       </div>
-                      <p className={`${theme.subtext} text-sm mb-6`}>{exp.dateRange}</p>
+                      <p className={`${theme.subtext} text-sm mb-6`}>{formatDateRange(exp)}</p>
                       
                       <ul className={`${theme.text} space-y-3`}>
                         {exp.fullBullets?.map((bullet: string, i: number) => (

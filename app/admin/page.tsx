@@ -43,11 +43,56 @@ export default function AdminPanel() {
     try {
       const response = await fetch('/api/resume')
       const data = await response.json()
-      setResumeData(data)
-      setPhotoPreview(data.photoUrl)
+      
+      // Ensure all arrays exist with defaults
+      const normalizedData = {
+        ...data,
+        experiences: data.experiences || [],
+        education: data.education || [],
+        skills: data.skills || [],
+        publications: data.publications || [],
+        languages: data.languages || [],
+        articles: data.articles || [],
+        // Ensure basic fields exist
+        name: data.name || '',
+        title: data.title || '',
+        bio: data.bio || '',
+        email: data.email || '',
+        signalUrl: data.signalUrl || '',
+        linkedinPersonal: data.linkedinPersonal || '',
+        linkedinBusiness: data.linkedinBusiness || '',
+        photoUrl: data.photoUrl || null,
+        showMission: data.showMission || false,
+        missionTitle: data.missionTitle || '',
+        missionText: data.missionText || ''
+      }
+      
+      setResumeData(normalizedData)
+      setPhotoPreview(normalizedData.photoUrl)
       setLoading(false)
     } catch (error) {
       toast.error('Failed to load resume data')
+      // Set default empty structure if fetch fails
+      setResumeData({
+        id: 'default',
+        name: '',
+        title: '',
+        bio: '',
+        email: '',
+        signalUrl: '',
+        linkedinPersonal: '',
+        linkedinBusiness: '',
+        photoUrl: null,
+        showMission: false,
+        missionTitle: '',
+        missionText: '',
+        experiences: [],
+        education: [],
+        skills: [],
+        publications: [],
+        languages: [],
+        articles: []
+      })
       setLoading(false)
     }
   }
@@ -124,6 +169,7 @@ export default function AdminPanel() {
     { id: 'skills', label: 'Skills', icon: Code },
     { id: 'publications', label: 'Publications', icon: FileText },
     { id: 'languages', label: 'Languages', icon: Globe },
+    { id: 'articles', label: 'Articles', icon: FileText },
     { id: 'settings', label: 'Settings', icon: Settings },
   ]
 
@@ -145,7 +191,7 @@ export default function AdminPanel() {
               {saving ? 'Saving...' : 'Save Changes'}
             </button>
             <button
-              onClick={() => signOut()}
+              onClick={() => signOut({ callbackUrl: '/signin' })}
               className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
             >
               <LogOut size={18} />
@@ -291,17 +337,23 @@ export default function AdminPanel() {
                       onClick={() => {
                         const newExp = {
                           id: Date.now().toString(),
-                          dateRange: '',
                           jobTitle: '',
                           company: '',
                           duties: ['', '', ''],
                           fullBullets: [''],
                           workLocation: null,
-                          order: resumeData.experiences.length
+                          startDate: new Date().toISOString().split('T')[0],
+                          endDate: '',
+                          isCurrent: false,
+                          street: '',
+                          city: '',
+                          state: '',
+                          zipCode: '',
+                          order: (resumeData.experiences || []).length
                         }
                         setResumeData({
                           ...resumeData,
-                          experiences: [...resumeData.experiences, newExp]
+                          experiences: [...(resumeData.experiences || []), newExp]
                         })
                       }}
                       className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700"
@@ -315,18 +367,8 @@ export default function AdminPanel() {
                     <div key={exp.id} className="border rounded-lg p-4 space-y-4">
                       <div className="flex justify-between items-start">
                         <div className="flex-1 space-y-4">
-                          <div className="grid grid-cols-3 gap-4">
-                            <input
-                              type="text"
-                              placeholder="Date Range"
-                              value={exp.dateRange}
-                              onChange={(e) => {
-                                const updated = [...resumeData.experiences]
-                                updated[index].dateRange = e.target.value
-                                setResumeData({ ...resumeData, experiences: updated })
-                              }}
-                              className="px-3 py-2 border rounded-lg"
-                            />
+                          {/* Job Title and Company */}
+                          <div className="grid grid-cols-2 gap-4">
                             <input
                               type="text"
                               placeholder="Job Title"
@@ -350,6 +392,61 @@ export default function AdminPanel() {
                               className="px-3 py-2 border rounded-lg"
                             />
                           </div>
+
+                          {/* Date Fields */}
+                          <div>
+                            <label className="block text-sm font-medium mb-2">Employment Dates</label>
+                            <div className="grid grid-cols-3 gap-4">
+                              <div>
+                                <label className="block text-xs text-gray-600 mb-1">Start Date</label>
+                                <input
+                                  type="date"
+                                  value={exp.startDate}
+                                  onChange={(e) => {
+                                    const updated = [...resumeData.experiences]
+                                    updated[index].startDate = e.target.value
+                                    setResumeData({ ...resumeData, experiences: updated })
+                                  }}
+                                  className="w-full px-3 py-2 border rounded-lg"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-xs text-gray-600 mb-1">End Date</label>
+                                <input
+                                  type="date"
+                                  value={exp.endDate}
+                                  onChange={(e) => {
+                                    const updated = [...resumeData.experiences]
+                                    updated[index].endDate = e.target.value
+                                    updated[index].isCurrent = false
+                                    setResumeData({ ...resumeData, experiences: updated })
+                                  }}
+                                  disabled={exp.isCurrent}
+                                  className="w-full px-3 py-2 border rounded-lg disabled:bg-gray-100"
+                                />
+                              </div>
+                              <div className="flex items-end">
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                  <input
+                                    type="checkbox"
+                                    checked={exp.isCurrent}
+                                    onChange={(e) => {
+                                      const updated = [...resumeData.experiences]
+                                      updated[index].isCurrent = e.target.checked
+                                      if (e.target.checked) {
+                                        updated[index].endDate = ''
+                                      }
+                                      setResumeData({ ...resumeData, experiences: updated })
+                                    }}
+                                    className="text-purple-600"
+                                  />
+                                  <span className="text-sm">Current Position</span>
+                                </label>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Work Location */}
                           <div>
                             <label className="block text-sm font-medium mb-2">Work Location</label>
                             <div className="flex gap-4">
@@ -400,6 +497,61 @@ export default function AdminPanel() {
                               </label>
                             </div>
                           </div>
+
+                          {/* Address Fields (Hidden from resume) */}
+                          <div>
+                            <label className="block text-sm font-medium mb-2">
+                              Office Address <span className="text-xs text-gray-500">(Not displayed on resume)</span>
+                            </label>
+                            <div className="grid grid-cols-2 gap-4">
+                              <input
+                                type="text"
+                                placeholder="Street Address"
+                                value={exp.street || ''}
+                                onChange={(e) => {
+                                  const updated = [...resumeData.experiences]
+                                  updated[index].street = e.target.value
+                                  setResumeData({ ...resumeData, experiences: updated })
+                                }}
+                                className="px-3 py-2 border rounded-lg"
+                              />
+                              <input
+                                type="text"
+                                placeholder="City"
+                                value={exp.city || ''}
+                                onChange={(e) => {
+                                  const updated = [...resumeData.experiences]
+                                  updated[index].city = e.target.value
+                                  setResumeData({ ...resumeData, experiences: updated })
+                                }}
+                                className="px-3 py-2 border rounded-lg"
+                              />
+                              <input
+                                type="text"
+                                placeholder="State"
+                                value={exp.state || ''}
+                                onChange={(e) => {
+                                  const updated = [...resumeData.experiences]
+                                  updated[index].state = e.target.value
+                                  setResumeData({ ...resumeData, experiences: updated })
+                                }}
+                                className="px-3 py-2 border rounded-lg"
+                              />
+                              <input
+                                type="text"
+                                placeholder="ZIP Code"
+                                value={exp.zipCode || ''}
+                                onChange={(e) => {
+                                  const updated = [...resumeData.experiences]
+                                  updated[index].zipCode = e.target.value
+                                  setResumeData({ ...resumeData, experiences: updated })
+                                }}
+                                className="px-3 py-2 border rounded-lg"
+                              />
+                            </div>
+                          </div>
+
+                          {/* Short Duties */}
                           <div>
                             <label className="block text-sm font-medium mb-2">Short Duties (3)</label>
                             {[0, 1, 2].map((i) => (
@@ -407,7 +559,7 @@ export default function AdminPanel() {
                                 key={i}
                                 type="text"
                                 placeholder={`Duty ${i + 1}`}
-                                value={exp.duties[i] || ''}
+                                value={exp.duties?.[i] || ''}
                                 onChange={(e) => {
                                   const updated = [...resumeData.experiences]
                                   if (!updated[index].duties) updated[index].duties = []
@@ -419,6 +571,7 @@ export default function AdminPanel() {
                             ))}
                           </div>
 
+                          {/* Full Bullets */}
                           <div>
                             <label className="block text-sm font-medium mb-2">Full Bullets</label>
                             {exp.fullBullets?.map((bullet: string, bulletIndex: number) => (
@@ -458,6 +611,7 @@ export default function AdminPanel() {
                           </div>
                         </div>
 
+                        {/* Action buttons */}
                         <div className="flex flex-col gap-2 ml-4">
                           <button
                             onClick={() => {
@@ -519,7 +673,7 @@ export default function AdminPanel() {
                           major: '',
                           location: '',
                           yearsAttended: '',
-                          order: resumeData.education?.length || 0
+                          order: (resumeData.education || []).length
                         }
                         setResumeData({
                           ...resumeData,
@@ -620,7 +774,7 @@ export default function AdminPanel() {
                           name: '',
                           level: 5,
                           hoverText: '',
-                          order: resumeData.skills?.length || 0
+                          order: (resumeData.skills || []).length
                         }
                         setResumeData({
                           ...resumeData,
@@ -703,7 +857,7 @@ export default function AdminPanel() {
                           id: Date.now().toString(),
                           title: '',
                           year: '',
-                          order: resumeData.publications?.length || 0
+                          order: (resumeData.publications || []).length
                         }
                         setResumeData({
                           ...resumeData,
@@ -770,7 +924,7 @@ export default function AdminPanel() {
                           id: Date.now().toString(),
                           name: '',
                           proficiency: '',
-                          order: resumeData.languages?.length || 0
+                          order: (resumeData.languages || []).length
                         }
                         setResumeData({
                           ...resumeData,
@@ -826,49 +980,244 @@ export default function AdminPanel() {
                 </div>
               )}
 
-                {/* Settings Tab */}
-                {activeTab === 'settings' && (
-                  <div className="space-y-6">
-                    <h2 className="text-xl font-bold mb-4">Settings</h2>
+              {/* Articles Tab */}
+              {activeTab === 'articles' && (
+                <div className="space-y-6">
+                  <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-xl font-bold">LinkedIn Articles</h2>
+                    <button
+                      onClick={() => {
+                        const newArticle = {
+                          id: Date.now().toString(),
+                          title: '',
+                          subtitle: '',
+                          excerpt: '',
+                          url: '',
+                          ogImageUrl: '',
+                          publishedDate: new Date().toISOString().split('T')[0],
+                          readTime: '',
+                          tags: [],
+                          order: (resumeData.articles || []).length
+                        }
+                        setResumeData({
+                          ...resumeData,
+                          articles: [...(resumeData.articles || []), newArticle]
+                        })
+                      }}
+                      className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700"
+                    >
+                      <Plus size={18} />
+                      Add Article
+                    </button>
+                  </div>
 
-                    <div className="border-t pt-6">
-                      <h3 className="text-lg font-semibold mb-4">Mission Section</h3>
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-3">
-                          <label className="relative inline-flex items-center cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={resumeData.showMission || false}
-                              onChange={(e) => setResumeData({ ...resumeData, showMission: e.target.checked })}
-                              className="sr-only peer"
-                            />
-                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
-                          </label>
-                          <span className="text-sm font-medium">Show Mission Section</span>
-                        </div>
+                  {resumeData.articles?.map((article: any, index: number) => (
+                    <div key={article.id} className="border rounded-lg p-4 space-y-4">
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1 space-y-4">
+                          {/* Order and Title */}
+                          <div className="grid grid-cols-12 gap-4">
+                            <div className="col-span-2">
+                              <label className="block text-sm font-medium mb-1">Order #</label>
+                              <input
+                                type="number"
+                                placeholder="1"
+                                value={article.order}
+                                onChange={(e) => {
+                                  const updated = [...resumeData.articles]
+                                  updated[index].order = parseInt(e.target.value) || 0
+                                  setResumeData({ ...resumeData, articles: updated })
+                                }}
+                                className="w-full px-3 py-2 border rounded-lg"
+                              />
+                            </div>
+                            <div className="col-span-10">
+                              <label className="block text-sm font-medium mb-1">Title*</label>
+                              <input
+                                type="text"
+                                placeholder="Article Title"
+                                value={article.title}
+                                onChange={(e) => {
+                                  const updated = [...resumeData.articles]
+                                  updated[index].title = e.target.value
+                                  setResumeData({ ...resumeData, articles: updated })
+                                }}
+                                className="w-full px-3 py-2 border rounded-lg"
+                              />
+                            </div>
+                          </div>
 
-                        {resumeData.showMission && (
-                          <>
+                          {/* Subtitle */}
+                          <div>
+                            <label className="block text-sm font-medium mb-1">Subtitle</label>
                             <input
                               type="text"
-                              placeholder="Mission Title (e.g., 'Mission')"
-                              value={resumeData.missionTitle || ''}
-                              onChange={(e) => setResumeData({ ...resumeData, missionTitle: e.target.value })}
+                              placeholder="Brief subtitle or key takeaway"
+                              value={article.subtitle}
+                              onChange={(e) => {
+                                const updated = [...resumeData.articles]
+                                updated[index].subtitle = e.target.value
+                                setResumeData({ ...resumeData, articles: updated })
+                              }}
                               className="w-full px-3 py-2 border rounded-lg"
                             />
+                          </div>
+
+                          {/* Excerpt */}
+                          <div>
+                            <label className="block text-sm font-medium mb-1">Excerpt*</label>
                             <textarea
-                              placeholder="Mission Text"
-                              value={resumeData.missionText || ''}
-                              onChange={(e) => setResumeData({ ...resumeData, missionText: e.target.value })}
-                              rows={4}
+                              placeholder="Brief description of the article..."
+                              value={article.excerpt}
+                              onChange={(e) => {
+                                const updated = [...resumeData.articles]
+                                updated[index].excerpt = e.target.value
+                                setResumeData({ ...resumeData, articles: updated })
+                              }}
+                              rows={3}
                               className="w-full px-3 py-2 border rounded-lg"
                             />
-                          </>
-                        )}
+                          </div>
+
+                          {/* URLs */}
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-sm font-medium mb-1">LinkedIn Article URL*</label>
+                              <input
+                                type="url"
+                                placeholder="https://www.linkedin.com/pulse/..."
+                                value={article.url}
+                                onChange={(e) => {
+                                  const updated = [...resumeData.articles]
+                                  updated[index].url = e.target.value
+                                  setResumeData({ ...resumeData, articles: updated })
+                                }}
+                                className="w-full px-3 py-2 border rounded-lg"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium mb-1">OG Image URL</label>
+                              <input
+                                type="url"
+                                placeholder="https://media.licdn.com/..."
+                                value={article.ogImageUrl}
+                                onChange={(e) => {
+                                  const updated = [...resumeData.articles]
+                                  updated[index].ogImageUrl = e.target.value
+                                  setResumeData({ ...resumeData, articles: updated })
+                                }}
+                                className="w-full px-3 py-2 border rounded-lg"
+                              />
+                            </div>
+                          </div>
+
+                          {/* Date and Read Time */}
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-sm font-medium mb-1">Published Date</label>
+                              <input
+                                type="date"
+                                value={article.publishedDate}
+                                onChange={(e) => {
+                                  const updated = [...resumeData.articles]
+                                  updated[index].publishedDate = e.target.value
+                                  setResumeData({ ...resumeData, articles: updated })
+                                }}
+                                className="w-full px-3 py-2 border rounded-lg"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium mb-1">Read Time</label>
+                              <input
+                                type="text"
+                                placeholder="5 min"
+                                value={article.readTime}
+                                onChange={(e) => {
+                                  const updated = [...resumeData.articles]
+                                  updated[index].readTime = e.target.value
+                                  setResumeData({ ...resumeData, articles: updated })
+                                }}
+                                className="w-full px-3 py-2 border rounded-lg"
+                              />
+                            </div>
+                          </div>
+
+                          {/* Tags */}
+                          <div>
+                            <label className="block text-sm font-medium mb-1">Tags (comma-separated)</label>
+                            <input
+                              type="text"
+                              placeholder="AI/ML, Defense Tech, Strategy"
+                              value={article.tags?.join(', ') || ''}
+                              onChange={(e) => {
+                                const updated = [...resumeData.articles]
+                                updated[index].tags = e.target.value.split(',').map((tag: string) => tag.trim()).filter(Boolean)
+                                setResumeData({ ...resumeData, articles: updated })
+                              }}
+                              className="w-full px-3 py-2 border rounded-lg"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Delete button */}
+                        <button
+                          onClick={() => {
+                            const updated = resumeData.articles.filter((_: any, i: number) => i !== index)
+                            setResumeData({ ...resumeData, articles: updated })
+                          }}
+                          className="text-red-600 hover:text-red-700 ml-4"
+                        >
+                          <Trash2 size={18} />
+                        </button>
                       </div>
                     </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Settings Tab */}
+              {activeTab === 'settings' && (
+                <div className="space-y-6">
+                  <h2 className="text-xl font-bold mb-4">Settings</h2>
+
+                  <div className="border-t pt-6">
+                    <h3 className="text-lg font-semibold mb-4">Mission Section</h3>
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-3">
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={resumeData.showMission || false}
+                            onChange={(e) => setResumeData({ ...resumeData, showMission: e.target.checked })}
+                            className="sr-only peer"
+                          />
+                          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                        </label>
+                        <span className="text-sm font-medium">Show Mission Section</span>
+                      </div>
+
+                      {resumeData.showMission && (
+                        <>
+                          <input
+                            type="text"
+                            placeholder="Mission Title (e.g., 'Mission')"
+                            value={resumeData.missionTitle || ''}
+                            onChange={(e) => setResumeData({ ...resumeData, missionTitle: e.target.value })}
+                            className="w-full px-3 py-2 border rounded-lg"
+                          />
+                          <textarea
+                            placeholder="Mission Text"
+                            value={resumeData.missionText || ''}
+                            onChange={(e) => setResumeData({ ...resumeData, missionText: e.target.value })}
+                            rows={4}
+                            className="w-full px-3 py-2 border rounded-lg"
+                          />
+                        </>
+                      )}
+                    </div>
                   </div>
-                )}
+                </div>
+              )}
             </motion.div>
           </div>
         </div>
