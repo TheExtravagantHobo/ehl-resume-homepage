@@ -20,7 +20,8 @@ import {
   Settings,
   Upload,
   Eye,
-  EyeOff
+  EyeOff,
+  Award
 } from 'lucide-react'
 import toast, { Toaster } from 'react-hot-toast'
 
@@ -167,6 +168,7 @@ export default function AdminPanel() {
     { id: 'experience', label: 'Experience', icon: Briefcase },
     { id: 'education', label: 'Education', icon: GraduationCap },
     { id: 'skills', label: 'Skills', icon: Code },
+    { id: 'certifications', label: 'Certifications', icon: Award }, // ADD THIS (import Award from lucide-react)
     { id: 'publications', label: 'Publications', icon: FileText },
     { id: 'languages', label: 'Languages', icon: Globe },
     { id: 'articles', label: 'Articles', icon: FileText },
@@ -840,6 +842,208 @@ export default function AdminPanel() {
                         >
                           <Trash2 size={18} />
                         </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Certifications Tab */}
+              {activeTab === 'certifications' && (
+                <div className="space-y-6">
+                  <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-xl font-bold">Certifications</h2>
+                    <button
+                      onClick={() => {
+                        const newCert = {
+                          id: Date.now().toString(),
+                          name: '',
+                          agency: '',
+                          certNumber: '',
+                          certDate: new Date().toISOString().split('T')[0],
+                          agencyUrl: '',
+                          iconUrl: '',
+                          order: (resumeData.certifications || []).length
+                        }
+                        setResumeData({
+                          ...resumeData,
+                          certifications: [...(resumeData.certifications || []), newCert]
+                        })
+                      }}
+                      className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700"
+                    >
+                      <Plus size={18} />
+                      Add Certification
+                    </button>
+                  </div>
+
+                  {resumeData.certifications?.map((cert: any, index: number) => (
+                    <div key={cert.id} className="border rounded-lg p-4 space-y-4">
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1 space-y-4">
+                          {/* Certification Name and Agency */}
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-sm font-medium mb-1">Certification Name*</label>
+                              <input
+                                type="text"
+                                placeholder="e.g., AWS Solutions Architect"
+                                value={cert.name}
+                                onChange={(e) => {
+                                  const updated = [...resumeData.certifications]
+                                  updated[index].name = e.target.value
+                                  setResumeData({ ...resumeData, certifications: updated })
+                                }}
+                                className="w-full px-3 py-2 border rounded-lg"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium mb-1">Certifying Agency*</label>
+                              <input
+                                type="text"
+                                placeholder="e.g., Amazon Web Services"
+                                value={cert.agency}
+                                onChange={(e) => {
+                                  const updated = [...resumeData.certifications]
+                                  updated[index].agency = e.target.value
+                                  setResumeData({ ...resumeData, certifications: updated })
+                                }}
+                                className="w-full px-3 py-2 border rounded-lg"
+                              />
+                            </div>
+                          </div>
+
+                          {/* Cert Number and Date */}
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-sm font-medium mb-1">Certification Number</label>
+                              <input
+                                type="text"
+                                placeholder="e.g., AWS-123456"
+                                value={cert.certNumber}
+                                onChange={(e) => {
+                                  const updated = [...resumeData.certifications]
+                                  updated[index].certNumber = e.target.value
+                                  setResumeData({ ...resumeData, certifications: updated })
+                                }}
+                                className="w-full px-3 py-2 border rounded-lg"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium mb-1">Certification Date</label>
+                              <input
+                                type="date"
+                                value={cert.certDate}
+                                onChange={(e) => {
+                                  const updated = [...resumeData.certifications]
+                                  updated[index].certDate = e.target.value
+                                  setResumeData({ ...resumeData, certifications: updated })
+                                }}
+                                className="w-full px-3 py-2 border rounded-lg"
+                              />
+                            </div>
+                          </div>
+
+                          {/* Agency URL and Icon */}
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-sm font-medium mb-1">Agency Website URL</label>
+                              <input
+                                type="url"
+                                placeholder="https://aws.amazon.com/certification/"
+                                value={cert.agencyUrl}
+                                onChange={(e) => {
+                                  const updated = [...resumeData.certifications]
+                                  updated[index].agencyUrl = e.target.value
+                                  setResumeData({ ...resumeData, certifications: updated })
+                                }}
+                                className="w-full px-3 py-2 border rounded-lg"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium mb-1">Icon</label>
+                              <div className="flex items-center gap-2">
+                                {cert.iconUrl && (
+                                  <img src={cert.iconUrl} alt="Icon" className="w-8 h-8 object-contain" />
+                                )}
+                                <input
+                                  type="text"
+                                  placeholder="Icon URL or upload"
+                                  value={cert.iconUrl}
+                                  onChange={(e) => {
+                                    const updated = [...resumeData.certifications]
+                                    updated[index].iconUrl = e.target.value
+                                    setResumeData({ ...resumeData, certifications: updated })
+                                  }}
+                                  className="flex-1 px-3 py-2 border rounded-lg"
+                                />
+                                <label className="cursor-pointer bg-gray-100 px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors">
+                                  <Upload size={18} />
+                                  <input 
+                                    type="file" 
+                                    accept="image/*" 
+                                    onChange={(e) => {
+                                      const file = e.target.files?.[0]
+                                      if (file) {
+                                        const reader = new FileReader()
+                                        reader.onloadend = () => {
+                                          const updated = [...resumeData.certifications]
+                                          updated[index].iconUrl = reader.result as string
+                                          setResumeData({ ...resumeData, certifications: updated })
+                                        }
+                                        reader.readAsDataURL(file)
+                                      }
+                                    }}
+                                    className="hidden" 
+                                  />
+                                </label>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Action buttons */}
+                        <div className="flex flex-col gap-2 ml-4">
+                          <button
+                            onClick={() => {
+                              const updated = resumeData.certifications.filter((_: any, i: number) => i !== index)
+                              setResumeData({ ...resumeData, certifications: updated })
+                            }}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (index > 0) {
+                                const updated = [...resumeData.certifications]
+                                const temp = updated[index]
+                                updated[index] = updated[index - 1]
+                                updated[index - 1] = temp
+                                setResumeData({ ...resumeData, certifications: updated })
+                              }
+                            }}
+                            disabled={index === 0}
+                            className="text-gray-600 hover:text-gray-700 disabled:opacity-30"
+                          >
+                            <ArrowUp size={18} />
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (index < resumeData.certifications.length - 1) {
+                                const updated = [...resumeData.certifications]
+                                const temp = updated[index]
+                                updated[index] = updated[index + 1]
+                                updated[index + 1] = temp
+                                setResumeData({ ...resumeData, certifications: updated })
+                              }
+                            }}
+                            disabled={index === resumeData.certifications.length - 1}
+                            className="text-gray-600 hover:text-gray-700 disabled:opacity-30"
+                          >
+                            <ArrowDown size={18} />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ))}

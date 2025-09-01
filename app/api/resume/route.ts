@@ -15,16 +15,38 @@ export async function GET(request: NextRequest) {
     const skills = await prisma.skill.findMany({ orderBy: { order: 'asc' } })
     const publications = await prisma.publication.findMany({ orderBy: { order: 'asc' } })
     const languages = await prisma.language.findMany({ orderBy: { order: 'asc' } })
+    const certifications = await prisma.certification.findMany({ orderBy: { order: 'asc' } }).catch(() => [])
     const articles = await prisma.article.findMany({ orderBy: { order: 'asc' } }).catch(() => [])
+
+    // Format experiences dates for the admin panel
+    const formattedExperiences = experiences.map(exp => ({
+      ...exp,
+      // Convert DateTime to string format (YYYY-MM-DD) for the admin panel
+      startDate: exp.startDate ? new Date(exp.startDate).toISOString().split('T')[0] : '',
+      endDate: exp.endDate ? new Date(exp.endDate).toISOString().split('T')[0] : ''
+    }))
+
+    // Format certifications dates
+    const formattedCertifications = certifications.map(cert => ({
+      ...cert,
+      certDate: cert.certDate ? new Date(cert.certDate).toISOString().split('T')[0] : ''
+    }))
+
+    // Format articles dates
+    const formattedArticles = articles.map(article => ({
+      ...article,
+      publishedDate: article.publishedDate ? new Date(article.publishedDate).toISOString().split('T')[0] : ''
+    }))
 
     return NextResponse.json({
       ...resume,
       education,
-      experiences,
+      experiences: formattedExperiences,
       skills,
       publications,
       languages,
-      articles
+      certifications: formattedCertifications,
+      articles: formattedArticles
     })
   } catch (error) {
     console.error('Error fetching resume data:', error)
@@ -42,8 +64,8 @@ export async function POST(request: NextRequest) {
   try {
     const data = await request.json()
 
-    // Update resume basic info
-    const { education, experiences, skills, publications, languages, articles, ...resumeData } = data
+    // Update resume basic info - MUST extract certifications here
+    const { education, experiences, skills, publications, languages, certifications, articles, ...resumeData } = data
     
     // Remove theme from resumeData since we're not using it anymore
     const { theme, ...cleanResumeData } = resumeData
@@ -75,18 +97,19 @@ export async function POST(request: NextRequest) {
     if (experiences && experiences.length > 0) {
       await prisma.experience.createMany({
         data: experiences.map((exp: any, index: number) => {
-          // Calculate dateRange from dates if available
-          let dateRange = exp.dateRange || ''
-          if (exp.startDate) {
-            const startYear = new Date(exp.startDate).getFullYear()
-            if (exp.isCurrent) {
-              dateRange = `${startYear} - Present`
-            } else if (exp.endDate) {
-              const endYear = new Date(exp.endDate).getFullYear()
-              dateRange = startYear === endYear ? `${startYear}` : `${startYear} - ${endYear}`
-            } else {
-              dateRange = `${startYear}`
-            }
+          // Parse dates properly
+          const startDate = exp.startDate ? new Date(exp.startDate) : new Date()
+          const endDate = exp.endDate && !exp.isCurrent ? new Date(exp.endDate) : null
+          
+          // Calculate dateRange from the actual dates
+          const startYear = startDate.getFullYear()
+          let dateRange = `${startYear}`
+          
+          if (exp.isCurrent) {
+            dateRange = `${startYear} - Present`
+          } else if (endDate) {
+            const endYear = endDate.getFullYear()
+            dateRange = startYear === endYear ? `${startYear}` : `${startYear} - ${endYear}`
           }
 
           return {
@@ -96,9 +119,8 @@ export async function POST(request: NextRequest) {
             duties: exp.duties || [],
             fullBullets: exp.fullBullets || [],
             workLocation: exp.workLocation || null,
-            // Use existing dates or create defaults
-            startDate: exp.startDate ? new Date(exp.startDate) : new Date(),
-            endDate: exp.endDate && !exp.isCurrent ? new Date(exp.endDate) : null,
+            startDate: startDate,
+            endDate: endDate,
             isCurrent: exp.isCurrent || false,
             dateRange: dateRange,
             // Address fields
@@ -152,7 +174,28 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Update articles (only if table exists)
+    // Update certifications
+    try {
+      await prisma.certification.deleteMany()
+      if (certifications && certifications.length > 0) {
+        await prisma.certification.createMany({
+          data: certifications.map((cert: any, index: number) => ({
+            id: cert.id || `cert_${Date.now()}_${index}`,
+            name: cert.name || '',
+            agency: cert.agency || '',
+            certNumber: cert.certNumber || null,
+            certDate: cert.certDate ? new Date(cert.certDate) : new Date(),
+            agencyUrl: cert.agencyUrl || null,
+            iconUrl: cert.iconUrl || null,
+            order: index
+          }))
+        })
+      }
+    } catch (error) {
+      console.log('Certifications table not ready yet')
+    }
+
+    // Update articles
     try {
       await prisma.article.deleteMany()
       if (articles && articles.length > 0) {
@@ -172,7 +215,6 @@ export async function POST(request: NextRequest) {
         })
       }
     } catch (error) {
-      // Article table might not exist yet, that's ok
       console.log('Articles table not ready yet')
     }
 

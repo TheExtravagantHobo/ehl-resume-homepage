@@ -15,7 +15,9 @@ import {
   Code,
   FileText,
   Globe,
-  Briefcase
+  Briefcase,
+  Award,
+  ExternalLink
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -60,7 +62,15 @@ interface Language {
   name: string
   proficiency: string
 }
-
+interface Certification {
+  id: string
+  name: string
+  agency: string
+  certNumber?: string
+  certDate: string
+  agencyUrl?: string
+  iconUrl?: string
+}
 // Only dark-modern theme
 const theme = {
   bg: 'bg-gradient-to-br from-slate-900 to-slate-800',
@@ -98,6 +108,7 @@ export default function ResumePage() {
   const [selectedExperience, setSelectedExperience] = useState<string | null>(null)
   const [showPublications, setShowPublications] = useState(false)
   const [showLanguages, setShowLanguages] = useState(false)
+  const [showCertifications, setShowCertifications] = useState(false)
   const [resumeData, setResumeData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 
@@ -310,6 +321,87 @@ export default function ResumePage() {
                             <span className={theme.text}>{lang.name}</span>
                             <span className={theme.subtext}>{lang.proficiency}</span>
                           </div>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
+
+            {/* Certifications Section */}
+            {resumeData.certifications && resumeData.certifications.length > 0 && (
+              <div className="mt-4">
+                <button
+                  onClick={() => setShowCertifications(!showCertifications)}
+                  className={`w-full text-left ${theme.card} p-4 rounded-lg shadow-md hover:shadow-lg transition-all flex justify-between items-center group`}
+                >
+                  <div className="flex items-center gap-2">
+                    <Award size={20} />
+                    <span className={`font-medium ${theme.text}`}>Certifications ({resumeData.certifications.length})</span>
+                  </div>
+                  <ChevronRight className={`transform transition-transform ${showCertifications ? 'rotate-90' : ''} text-gray-400`} size={20} />
+                </button>
+                
+                <AnimatePresence>
+                  {showCertifications && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <div className={`mt-2 ${theme.card} p-4 rounded-lg space-y-3`}>
+                        {resumeData.certifications.map((cert: Certification) => (
+                          <a
+                            key={cert.id}
+                            href={cert.agencyUrl || '#'}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-start gap-3 hover:bg-slate-700 p-2 rounded-lg transition-colors cursor-pointer group"
+                          >
+                            {/* Icon */}
+                            <div className="flex-shrink-0 w-8 h-8">
+                              {cert.iconUrl ? (
+                                <img 
+                                  src={cert.iconUrl} 
+                                  alt={cert.agency}
+                                  className="w-8 h-8 object-contain rounded"
+                                  onError={(e) => {
+                                    e.currentTarget.style.display = 'none'
+                                  }}
+                                />
+                              ) : (
+                                <div className="w-8 h-8 bg-slate-600 rounded flex items-center justify-center">
+                                  <Award size={16} className="text-gray-400" />
+                                </div>
+                              )}
+                            </div>
+                            
+                            {/* Certification Details */}
+                            <div className="flex-1">
+                              <div className={`${theme.text} font-medium group-hover:text-purple-400 transition-colors`}>
+                                {cert.name}
+                              </div>
+                              <div className={`${theme.subtext} text-sm`}>
+                                {cert.agency}
+                              </div>
+                              <div className={`${theme.subtext} text-xs mt-1`}>
+                                {cert.certNumber && (
+                                  <span>Cert #{cert.certNumber} • </span>
+                                )}
+                                {cert.certDate && (
+                                  <span>{new Date(cert.certDate).toLocaleDateString('en-US', { 
+                                    year: 'numeric', 
+                                    month: 'short' 
+                                  })}</span>
+                                )}
+                              </div>
+                            </div>
+                            
+                            {/* External link indicator */}
+                            <ExternalLink size={14} className="text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                          </a>
                         ))}
                       </div>
                     </motion.div>

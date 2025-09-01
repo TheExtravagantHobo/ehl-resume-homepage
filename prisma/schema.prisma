@@ -88,6 +88,19 @@ model Language {
   order         Int
 }
 
+model Certification {
+  id                String    @id @default(cuid())
+  name              String    // Certification name
+  agency            String    // Certifying agency/institution
+  certNumber        String?   // Certification number (optional)
+  certDate          DateTime  // Certification date
+  agencyUrl         String?   // Agency website URL
+  iconUrl           String?   // Icon URL or base64 image
+  order             Int       // Display order
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
 model Article {
   id            String    @id @default(cuid())
   title         String
