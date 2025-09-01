@@ -43,10 +43,13 @@ export async function POST(request: NextRequest) {
     // Update resume basic info
     const { education, experiences, skills, publications, languages, ...resumeData } = data
     
+    // Remove theme from resumeData since we're not using it anymore
+    const { theme, ...cleanResumeData } = resumeData
+    
     await prisma.resume.upsert({
       where: { id: data.id || 'default' },
-      update: resumeData,
-      create: { ...resumeData, id: 'default' }
+      update: cleanResumeData,
+      create: { ...cleanResumeData, id: 'default' }
     })
 
     // Update education (delete all and recreate)
@@ -54,18 +57,29 @@ export async function POST(request: NextRequest) {
     if (education && education.length > 0) {
       await prisma.education.createMany({
         data: education.map((edu: any, index: number) => ({
-          ...edu,
+          id: edu.id || `edu_${Date.now()}_${index}`,
+          schoolName: edu.schoolName || '',
+          degree: edu.degree || '',
+          major: edu.major || '',
+          location: edu.location || '',
+          yearsAttended: edu.yearsAttended || '',
           order: index
         }))
       })
     }
 
-    // Update experiences
+    // Update experiences with workLocation field
     await prisma.experience.deleteMany()
     if (experiences && experiences.length > 0) {
       await prisma.experience.createMany({
         data: experiences.map((exp: any, index: number) => ({
-          ...exp,
+          id: exp.id || `exp_${Date.now()}_${index}`,
+          dateRange: exp.dateRange || '',
+          jobTitle: exp.jobTitle || '',
+          company: exp.company || '',
+          duties: exp.duties || [],
+          fullBullets: exp.fullBullets || [],
+          workLocation: exp.workLocation || null,  // Add this field
           order: index
         }))
       })
@@ -76,7 +90,10 @@ export async function POST(request: NextRequest) {
     if (skills && skills.length > 0) {
       await prisma.skill.createMany({
         data: skills.map((skill: any, index: number) => ({
-          ...skill,
+          id: skill.id || `skill_${Date.now()}_${index}`,
+          name: skill.name || '',
+          level: skill.level || 5,
+          hoverText: skill.hoverText || '',
           order: index
         }))
       })
@@ -87,7 +104,9 @@ export async function POST(request: NextRequest) {
     if (publications && publications.length > 0) {
       await prisma.publication.createMany({
         data: publications.map((pub: any, index: number) => ({
-          ...pub,
+          id: pub.id || `pub_${Date.now()}_${index}`,
+          title: pub.title || '',
+          year: pub.year || '',
           order: index
         }))
       })
@@ -98,7 +117,9 @@ export async function POST(request: NextRequest) {
     if (languages && languages.length > 0) {
       await prisma.language.createMany({
         data: languages.map((lang: any, index: number) => ({
-          ...lang,
+          id: lang.id || `lang_${Date.now()}_${index}`,
+          name: lang.name || '',
+          proficiency: lang.proficiency || '',
           order: index
         }))
       })
@@ -107,6 +128,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Error updating resume data:', error)
-    return NextResponse.json({ error: 'Failed to update resume data' }, { status: 500 })
+    return NextResponse.json({ 
+      error: 'Failed to update resume data', 
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 })
   }
 }
