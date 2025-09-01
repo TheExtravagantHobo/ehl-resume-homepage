@@ -2,12 +2,9 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowRight, FileText, Briefcase, Mail, Settings } from 'lucide-react'
-import { useSession } from 'next-auth/react'
+import { ArrowRight, FileText, Briefcase, Mail } from 'lucide-react'
 
 export default function LandingPage() {
-  const { data: session, status } = useSession()
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800">
       {/* Navigation */}
@@ -30,19 +27,12 @@ export default function LandingPage() {
                 <Mail size={18} />
                 Contact
               </a>
-              
-              {/* Admin Link - just gear icon */}
-              {session && (
-                <Link href="/admin" className="text-gray-500 hover:text-purple-400 transition-colors">
-                  <Settings size={18} />
-                </Link>
-              )}
             </div>
           </div>
         </div>
       </nav>
 
-      {/* Hero Section */}
+      {/* Hero Section - rest stays the same */}
       <main className="flex-1">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
           <div className="text-center">
