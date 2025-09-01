@@ -296,6 +296,7 @@ export default function AdminPanel() {
                           company: '',
                           duties: ['', '', ''],
                           fullBullets: [''],
+                          workLocation: null,
                           order: resumeData.experiences.length
                         }
                         setResumeData({
@@ -349,7 +350,56 @@ export default function AdminPanel() {
                               className="px-3 py-2 border rounded-lg"
                             />
                           </div>
-
+                          <div>
+                            <label className="block text-sm font-medium mb-2">Work Location</label>
+                            <div className="flex gap-4">
+                              <label className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                  type="radio"
+                                  name={`workLocation-${exp.id}`}
+                                  value=""
+                                  checked={!exp.workLocation}
+                                  onChange={() => {
+                                    const updated = [...resumeData.experiences]
+                                    updated[index].workLocation = null
+                                    setResumeData({ ...resumeData, experiences: updated })
+                                  }}
+                                  className="text-purple-600"
+                                />
+                                <span className="text-sm">In-Person</span>
+                              </label>
+                              <label className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                  type="radio"
+                                  name={`workLocation-${exp.id}`}
+                                  value="remote"
+                                  checked={exp.workLocation === 'remote'}
+                                  onChange={() => {
+                                    const updated = [...resumeData.experiences]
+                                    updated[index].workLocation = 'remote'
+                                    setResumeData({ ...resumeData, experiences: updated })
+                                  }}
+                                  className="text-purple-600"
+                                />
+                                <span className="text-sm">Remote</span>
+                              </label>
+                              <label className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                  type="radio"
+                                  name={`workLocation-${exp.id}`}
+                                  value="hybrid"
+                                  checked={exp.workLocation === 'hybrid'}
+                                  onChange={() => {
+                                    const updated = [...resumeData.experiences]
+                                    updated[index].workLocation = 'hybrid'
+                                    setResumeData({ ...resumeData, experiences: updated })
+                                  }}
+                                  className="text-purple-600"
+                                />
+                                <span className="text-sm">Hybrid</span>
+                              </label>
+                            </div>
+                          </div>
                           <div>
                             <label className="block text-sm font-medium mb-2">Short Duties (3)</label>
                             {[0, 1, 2].map((i) => (
@@ -776,63 +826,49 @@ export default function AdminPanel() {
                 </div>
               )}
 
-              {/* Settings Tab */}
-              {activeTab === 'settings' && (
-                <div className="space-y-6">
-                  <h2 className="text-xl font-bold mb-4">Settings</h2>
+                {/* Settings Tab */}
+                {activeTab === 'settings' && (
+                  <div className="space-y-6">
+                    <h2 className="text-xl font-bold mb-4">Settings</h2>
 
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Default Theme</label>
-                    <select
-                      value={resumeData.theme || 'light-modern'}
-                      onChange={(e) => setResumeData({ ...resumeData, theme: e.target.value })}
-                      className="px-3 py-2 border rounded-lg"
-                    >
-                      <option value="light-modern">Light Modern</option>
-                      <option value="dark-modern">Dark Modern</option>
-                      <option value="light-cream">Light Cream</option>
-                      <option value="dark-cream">Dark Cream</option>
-                    </select>
-                  </div>
+                    <div className="border-t pt-6">
+                      <h3 className="text-lg font-semibold mb-4">Mission Section</h3>
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-3">
+                          <label className="relative inline-flex items-center cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={resumeData.showMission || false}
+                              onChange={(e) => setResumeData({ ...resumeData, showMission: e.target.checked })}
+                              className="sr-only peer"
+                            />
+                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                          </label>
+                          <span className="text-sm font-medium">Show Mission Section</span>
+                        </div>
 
-                  <div className="border-t pt-6">
-                    <h3 className="text-lg font-semibold mb-4">Mission Section</h3>
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-3">
-                        <label className="relative inline-flex items-center cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={resumeData.showMission || false}
-                            onChange={(e) => setResumeData({ ...resumeData, showMission: e.target.checked })}
-                            className="sr-only peer"
-                          />
-                          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
-                        </label>
-                        <span className="text-sm font-medium">Show Mission Section</span>
+                        {resumeData.showMission && (
+                          <>
+                            <input
+                              type="text"
+                              placeholder="Mission Title (e.g., 'Mission')"
+                              value={resumeData.missionTitle || ''}
+                              onChange={(e) => setResumeData({ ...resumeData, missionTitle: e.target.value })}
+                              className="w-full px-3 py-2 border rounded-lg"
+                            />
+                            <textarea
+                              placeholder="Mission Text"
+                              value={resumeData.missionText || ''}
+                              onChange={(e) => setResumeData({ ...resumeData, missionText: e.target.value })}
+                              rows={4}
+                              className="w-full px-3 py-2 border rounded-lg"
+                            />
+                          </>
+                        )}
                       </div>
-
-                      {resumeData.showMission && (
-                        <>
-                          <input
-                            type="text"
-                            placeholder="Mission Title (e.g., 'Mission')"
-                            value={resumeData.missionTitle || ''}
-                            onChange={(e) => setResumeData({ ...resumeData, missionTitle: e.target.value })}
-                            className="w-full px-3 py-2 border rounded-lg"
-                          />
-                          <textarea
-                            placeholder="Mission Text"
-                            value={resumeData.missionText || ''}
-                            onChange={(e) => setResumeData({ ...resumeData, missionText: e.target.value })}
-                            rows={4}
-                            className="w-full px-3 py-2 border rounded-lg"
-                          />
-                        </>
-                      )}
                     </div>
                   </div>
-                </div>
-              )}
+                )}
             </motion.div>
           </div>
         </div>

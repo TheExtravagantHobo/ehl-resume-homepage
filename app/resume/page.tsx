@@ -8,9 +8,6 @@ import {
   Mail, 
   MessageCircle, 
   Linkedin, 
-  Sun, 
-  Moon, 
-  Palette,
   ChevronRight,
   X,
   Building,
@@ -20,7 +17,6 @@ import {
   Globe,
   Briefcase
 } from 'lucide-react'
-import Image from 'next/image'
 import Link from 'next/link'
 
 // Types
@@ -31,6 +27,7 @@ interface Experience {
   company: string
   duties: string[]
   fullBullets: string[]
+  workLocation?: string | null
 }
 
 interface Education {
@@ -61,116 +58,64 @@ interface Language {
   proficiency: string
 }
 
-// Theme configurations
-const themes = {
-  'light-modern': {
-    bg: 'bg-gradient-to-br from-slate-50 to-gray-100',
-    card: 'bg-white',
-    text: 'text-gray-900',
-    subtext: 'text-gray-600',
-    accent: 'from-purple-600 to-blue-600',
-    border: 'border-gray-200',
-    timeline: 'bg-gray-300',
-    dot: 'bg-purple-600',
-  },
-  'dark-modern': {
-    bg: 'bg-gradient-to-br from-slate-900 to-slate-800',
-    card: 'bg-slate-800',
-    text: 'text-white',
-    subtext: 'text-gray-400',
-    accent: 'from-purple-500 to-blue-500',
-    border: 'border-slate-700',
-    timeline: 'bg-slate-600',
-    dot: 'bg-purple-500',
-  },
-  'light-cream': {
-    bg: 'bg-gradient-to-br from-amber-50 to-orange-50',
-    card: 'bg-white',
-    text: 'text-amber-900',
-    subtext: 'text-amber-700',
-    accent: 'from-amber-600 to-orange-600',
-    border: 'border-amber-200',
-    timeline: 'bg-amber-300',
-    dot: 'bg-amber-600',
-  },
-  'dark-cream': {
-    bg: 'bg-gradient-to-br from-amber-950 to-orange-950',
-    card: 'bg-amber-900',
-    text: 'text-amber-50',
-    subtext: 'text-amber-300',
-    accent: 'from-amber-500 to-orange-500',
-    border: 'border-amber-800',
-    timeline: 'bg-amber-700',
-    dot: 'bg-amber-500',
-  },
+// Only dark-modern theme
+const theme = {
+  bg: 'bg-gradient-to-br from-slate-900 to-slate-800',
+  card: 'bg-slate-800',
+  text: 'text-white',
+  subtext: 'text-gray-400',
+  accent: 'from-purple-500 to-blue-500',
+  border: 'border-slate-700',
+  timeline: 'bg-slate-600',
+  dot: 'bg-purple-500',
 }
 
 export default function ResumePage() {
-  const [currentTheme, setCurrentTheme] = useState<keyof typeof themes>('light-modern')
   const [selectedExperience, setSelectedExperience] = useState<string | null>(null)
   const [showPublications, setShowPublications] = useState(false)
   const [showLanguages, setShowLanguages] = useState(false)
   const [resumeData, setResumeData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 
-  const theme = themes[currentTheme]
-
   // Animation refs
   const [educationRef, educationInView] = useInView({ triggerOnce: true, threshold: 0.1 })
   const [skillsRef, skillsInView] = useInView({ triggerOnce: true, threshold: 0.1 })
   const [experienceRef, experienceInView] = useInView({ triggerOnce: true, threshold: 0.1 })
 
-  // Mock data - will be replaced with API call
-useEffect(() => {
-  const fetchResumeData = async () => {
-    try {
-      const response = await fetch('/api/resume')
-      const data = await response.json()
-      setResumeData(data)
-      setCurrentTheme(data.theme || 'light-modern')
-      setLoading(false)
-    } catch (error) {
-      console.error('Error loading resume:', error)
-      // Use fallback data if API fails
-      setLoading(false)
+  useEffect(() => {
+    const fetchResumeData = async () => {
+      try {
+        const response = await fetch('/api/resume')
+        const data = await response.json()
+        setResumeData(data)
+        setLoading(false)
+      } catch (error) {
+        console.error('Error loading resume:', error)
+        setLoading(false)
+      }
     }
-  }
-  
-  fetchResumeData()
-}, [])
+    
+    fetchResumeData()
+  }, [])
 
   if (loading) {
     return (
       <div className={`min-h-screen ${theme.bg} flex items-center justify-center`}>
-        <div className="animate-pulse text-2xl">Loading...</div>
+        <div className="animate-pulse text-2xl text-white">Loading...</div>
+      </div>
+    )
+  }
+
+  if (!resumeData) {
+    return (
+      <div className={`min-h-screen ${theme.bg} flex items-center justify-center`}>
+        <div className="text-2xl text-white">No resume data available</div>
       </div>
     )
   }
 
   return (
-    <div className={`min-h-screen ${theme.bg} transition-all duration-500`}>
-      {/* Theme Switcher */}
-      <div className="fixed top-4 right-4 z-50 flex gap-2">
-        <button
-          onClick={() => setCurrentTheme(currentTheme.includes('light') ? 
-            currentTheme.replace('light', 'dark') as keyof typeof themes : 
-            currentTheme.replace('dark', 'light') as keyof typeof themes
-          )}
-          className={`p-2 ${theme.card} rounded-lg shadow-lg hover:scale-110 transition-transform`}
-        >
-          {currentTheme.includes('light') ? <Moon size={20} /> : <Sun size={20} />}
-        </button>
-        <button
-          onClick={() => setCurrentTheme(currentTheme.includes('modern') ? 
-            currentTheme.replace('modern', 'cream') as keyof typeof themes : 
-            currentTheme.replace('cream', 'modern') as keyof typeof themes
-          )}
-          className={`p-2 ${theme.card} rounded-lg shadow-lg hover:scale-110 transition-transform`}
-        >
-          <Palette size={20} />
-        </button>
-      </div>
-
+    <div className={`min-h-screen ${theme.bg}`}>
       <div className="max-w-7xl mx-auto px-4 py-12">
         {/* Header Section */}
         <motion.div 
@@ -181,9 +126,16 @@ useEffect(() => {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             {/* Left side - Photo */}
             <div className="flex items-center gap-6">
-              <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-gray-200">
-                <div className="w-full h-full bg-gradient-to-br from-purple-400 to-blue-400" />
-                {/* Photo placeholder - will use Image component with actual photo */}
+              <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-gray-700">
+                {resumeData.photoUrl ? (
+                  <img 
+                    src={resumeData.photoUrl} 
+                    alt={resumeData.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-purple-400 to-blue-400" />
+                )}
               </div>
               <div>
                 <motion.h1 
@@ -221,6 +173,23 @@ useEffect(() => {
           </div>
         </motion.div>
 
+        {/* Mission Section - Only show if enabled */}
+        {resumeData.showMission && resumeData.missionText && (
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className={`${theme.card} rounded-2xl shadow-xl p-8 mb-8`}
+          >
+            <h2 className={`text-2xl font-bold ${theme.text} mb-4`}>
+              {resumeData.missionTitle || 'Mission'}
+            </h2>
+            <p className={`${theme.subtext} leading-relaxed`}>
+              {resumeData.missionText}
+            </p>
+          </motion.div>
+        )}
+
         {/* Main Content Grid */}
         <div className="grid md:grid-cols-3 gap-8">
           {/* Education Column */}
@@ -233,7 +202,7 @@ useEffect(() => {
               {/* Timeline line */}
               <div className={`absolute left-4 top-0 bottom-0 w-0.5 ${theme.timeline}`} />
               
-              {resumeData.education.map((edu: Education, index: number) => (
+              {resumeData.education?.map((edu: Education, index: number) => (
                 <motion.div
                   key={edu.id}
                   initial={{ opacity: 0, x: -20 }}
@@ -264,7 +233,7 @@ useEffect(() => {
             </h2>
             
             {/* Skills bars */}
-            {resumeData.skills.map((skill: Skill, index: number) => (
+            {resumeData.skills?.map((skill: Skill, index: number) => (
               <motion.div
                 key={skill.id}
                 initial={{ opacity: 0, y: 10 }}
@@ -290,72 +259,76 @@ useEffect(() => {
             ))}
 
             {/* Languages Section */}
-            <div className="mt-8">
-              <button
-                onClick={() => setShowLanguages(!showLanguages)}
-                className={`w-full text-left ${theme.card} p-4 rounded-lg shadow-md hover:shadow-lg transition-all flex justify-between items-center group`}
-              >
-                <div className="flex items-center gap-2">
-                  <Globe size={20} />
-                  <span className={`font-medium ${theme.text}`}>Languages</span>
-                </div>
-                <ChevronRight className={`transform transition-transform ${showLanguages ? 'rotate-90' : ''}`} size={20} />
-              </button>
-              
-              <AnimatePresence>
-                {showLanguages && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    className="overflow-hidden"
-                  >
-                    <div className={`mt-2 ${theme.card} p-4 rounded-lg`}>
-                      {resumeData.languages.map((lang: Language) => (
-                        <div key={lang.id} className="flex justify-between py-1">
-                          <span className={theme.text}>{lang.name}</span>
-                          <span className={theme.subtext}>{lang.proficiency}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+            {resumeData.languages && resumeData.languages.length > 0 && (
+              <div className="mt-8">
+                <button
+                  onClick={() => setShowLanguages(!showLanguages)}
+                  className={`w-full text-left ${theme.card} p-4 rounded-lg shadow-md hover:shadow-lg transition-all flex justify-between items-center group`}
+                >
+                  <div className="flex items-center gap-2">
+                    <Globe size={20} />
+                    <span className={`font-medium ${theme.text}`}>Languages</span>
+                  </div>
+                  <ChevronRight className={`transform transition-transform ${showLanguages ? 'rotate-90' : ''} text-gray-400`} size={20} />
+                </button>
+                
+                <AnimatePresence>
+                  {showLanguages && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <div className={`mt-2 ${theme.card} p-4 rounded-lg`}>
+                        {resumeData.languages.map((lang: Language) => (
+                          <div key={lang.id} className="flex justify-between py-1">
+                            <span className={theme.text}>{lang.name}</span>
+                            <span className={theme.subtext}>{lang.proficiency}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
 
             {/* Publications Section */}
-            <div className="mt-4">
-              <button
-                onClick={() => setShowPublications(!showPublications)}
-                className={`w-full text-left ${theme.card} p-4 rounded-lg shadow-md hover:shadow-lg transition-all flex justify-between items-center group`}
-              >
-                <div className="flex items-center gap-2">
-                  <FileText size={20} />
-                  <span className={`font-medium ${theme.text}`}>Publications ({resumeData.publications.length})</span>
-                </div>
-                <ChevronRight className={`transform transition-transform ${showPublications ? 'rotate-90' : ''}`} size={20} />
-              </button>
-              
-              <AnimatePresence>
-                {showPublications && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    className="overflow-hidden"
-                  >
-                    <div className={`mt-2 ${theme.card} p-4 rounded-lg`}>
-                      {resumeData.publications.map((pub: Publication) => (
-                        <div key={pub.id} className="py-2 border-b last:border-0">
-                          <p className={`${theme.text} text-sm`}>{pub.title}</p>
-                          <p className={`${theme.subtext} text-xs`}>{pub.year}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+            {resumeData.publications && resumeData.publications.length > 0 && (
+              <div className="mt-4">
+                <button
+                  onClick={() => setShowPublications(!showPublications)}
+                  className={`w-full text-left ${theme.card} p-4 rounded-lg shadow-md hover:shadow-lg transition-all flex justify-between items-center group`}
+                >
+                  <div className="flex items-center gap-2">
+                    <FileText size={20} />
+                    <span className={`font-medium ${theme.text}`}>Publications ({resumeData.publications.length})</span>
+                  </div>
+                  <ChevronRight className={`transform transition-transform ${showPublications ? 'rotate-90' : ''} text-gray-400`} size={20} />
+                </button>
+                
+                <AnimatePresence>
+                  {showPublications && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <div className={`mt-2 ${theme.card} p-4 rounded-lg`}>
+                        {resumeData.publications.map((pub: Publication) => (
+                          <div key={pub.id} className="py-2 border-b border-slate-700 last:border-0">
+                            <p className={`${theme.text} text-sm`}>{pub.title}</p>
+                            <p className={`${theme.subtext} text-xs`}>{pub.year}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
           </div>
 
           {/* Experience Column */}
@@ -368,7 +341,7 @@ useEffect(() => {
               {/* Timeline line */}
               <div className={`absolute left-4 top-0 bottom-0 w-0.5 ${theme.timeline}`} />
               
-              {resumeData.experiences.map((exp: Experience, index: number) => (
+              {resumeData.experiences?.map((exp: Experience, index: number) => (
                 <motion.div
                   key={exp.id}
                   initial={{ opacity: 0, x: 20 }}
@@ -389,10 +362,17 @@ useEffect(() => {
                        onClick={() => setSelectedExperience(exp.id)}>
                     <p className={`${theme.subtext} text-xs mb-1`}>{exp.dateRange}</p>
                     <h3 className={`font-bold ${theme.text}`}>{exp.jobTitle}</h3>
-                    <p className={`${theme.subtext} text-sm mb-2`}>{exp.company}</p>
+                    <div className="flex items-center gap-2 mb-2">
+                      <p className={`${theme.subtext} text-sm`}>{exp.company}</p>
+                      {exp.workLocation && (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-700 text-gray-400">
+                          {exp.workLocation}
+                        </span>
+                      )}
+                    </div>
                     
                     <ul className={`${theme.subtext} text-xs space-y-1`}>
-                      {exp.duties.map((duty, i) => (
+                      {exp.duties?.map((duty, i) => (
                         <li key={i} className="flex items-start">
                           <span className="mr-1">•</span>
                           <span>{duty}</span>
@@ -437,11 +417,18 @@ useEffect(() => {
                   return (
                     <>
                       <h2 className={`text-2xl font-bold ${theme.text} mb-2`}>{exp.jobTitle}</h2>
-                      <p className={`${theme.subtext} mb-1`}>{exp.company}</p>
+                      <div className="flex items-center gap-2 mb-1">
+                        <p className={`${theme.subtext}`}>{exp.company}</p>
+                        {exp.workLocation && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-700 text-gray-400">
+                            {exp.workLocation}
+                          </span>
+                        )}
+                      </div>
                       <p className={`${theme.subtext} text-sm mb-6`}>{exp.dateRange}</p>
                       
                       <ul className={`${theme.text} space-y-3`}>
-                        {exp.fullBullets.map((bullet: string, i: number) => (
+                        {exp.fullBullets?.map((bullet: string, i: number) => (
                           <li key={i} className="flex items-start">
                             <span className={`mr-2 ${theme.subtext}`}>•</span>
                             <span className="text-sm leading-relaxed">{bullet}</span>

@@ -52,8 +52,10 @@ model Experience {
   company       String
   duties        String[]  // 3 short duties
   fullBullets   String[]  // All bullets for expanded view
+  workLocation  String?   // "remote", "hybrid", or null for in-person
   order         Int
 }
+
 
 model Skill {
   id            String    @id @default(cuid())
