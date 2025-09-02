@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useInView } from 'react-intersection-observer'
+import Link from 'next/link'
 import { 
   Mail, 
   MessageCircle, 
@@ -17,9 +18,9 @@ import {
   Globe,
   Briefcase,
   Award,
-  ExternalLink
+  ExternalLink,
+  ArrowLeft
 } from 'lucide-react'
-import Link from 'next/link'
 
 // Types
 interface Experience {
@@ -62,6 +63,7 @@ interface Language {
   name: string
   proficiency: string
 }
+
 interface Certification {
   id: string
   name: string
@@ -71,6 +73,7 @@ interface Certification {
   agencyUrl?: string
   iconUrl?: string
 }
+
 // Only dark-modern theme
 const theme = {
   bg: 'bg-gradient-to-br from-slate-900 to-slate-800',
@@ -151,6 +154,34 @@ export default function ResumePage() {
 
   return (
     <div className={`min-h-screen ${theme.bg}`}>
+      {/* Navigation Header */}
+      <nav className="border-b border-slate-700 bg-slate-900/80 backdrop-blur-sm sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16">
+            <div className="flex items-center">
+              <Link href="/" className="flex items-center gap-2 text-gray-300 hover:text-purple-400 transition-colors">
+                <ArrowLeft size={18} />
+                Back to Home
+              </Link>
+            </div>
+            <div className="flex items-center space-x-8">
+              <Link href="/resume" className="text-purple-400 flex items-center gap-2">
+                <FileText size={18} />
+                Resume
+              </Link>
+              <Link href="/portfolio" className="text-gray-300 hover:text-purple-400 transition-colors flex items-center gap-2">
+                <Briefcase size={18} />
+                Portfolio
+              </Link>
+              <a href="mailto:admin@theextravaganthobo.com" className="text-gray-300 hover:text-purple-400 transition-colors flex items-center gap-2">
+                <Mail size={18} />
+                Contact
+              </a>
+            </div>
+          </div>
+        </div>
+      </nav>
+
       <div className="max-w-7xl mx-auto px-4 py-12">
         {/* Header Section */}
         <motion.div 

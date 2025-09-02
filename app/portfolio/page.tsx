@@ -10,7 +10,10 @@ import {
   Calendar,
   Clock,
   Loader2,
-  FileText
+  FileText,
+  RefreshCw,
+  Briefcase,
+  Mail
 } from 'lucide-react'
 
 interface Article {
@@ -30,22 +33,41 @@ export default function PortfolioPage() {
   const [articles, setArticles] = useState<Article[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedTag, setSelectedTag] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  const fetchArticles = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      console.log('Fetching articles...')
+      const response = await fetch('/api/portfolio', {
+        // Add cache-busting to ensure fresh data
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache',
+        },
+      })
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      
+      const data = await response.json()
+      console.log('Articles received:', data)
+      console.log('Number of articles:', data.length)
+      
+      // Sort by order field
+      const sortedData = data.sort((a: Article, b: Article) => a.order - b.order)
+      setArticles(sortedData)
+    } catch (error) {
+      console.error('Error fetching articles:', error)
+      setError(error instanceof Error ? error.message : 'Failed to load articles')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
-    const fetchArticles = async () => {
-      try {
-        const response = await fetch('/api/portfolio')
-        const data = await response.json()
-        // Sort by order field
-        const sortedData = data.sort((a: Article, b: Article) => a.order - b.order)
-        setArticles(sortedData)
-      } catch (error) {
-        console.error('Error fetching articles:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-    
     fetchArticles()
   }, [])
 
@@ -60,11 +82,16 @@ export default function PortfolioPage() {
     : articles
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    })
+    try {
+      return new Date(dateString).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      })
+    } catch (e) {
+      console.error('Date formatting error:', e)
+      return dateString
+    }
   }
 
   return (
@@ -78,6 +105,27 @@ export default function PortfolioPage() {
                 <ArrowLeft size={18} />
                 Back to Home
               </Link>
+            </div>
+            <div className="flex items-center space-x-8">
+              <Link href="/resume" className="text-gray-300 hover:text-purple-400 transition-colors flex items-center gap-2">
+                <FileText size={18} />
+                Resume
+              </Link>
+              <Link href="/portfolio" className="text-purple-400 flex items-center gap-2">
+                <Briefcase size={18} />
+                Portfolio
+              </Link>
+              <a href="mailto:admin@theextravaganthobo.com" className="text-gray-300 hover:text-purple-400 transition-colors flex items-center gap-2">
+                <Mail size={18} />
+                Contact
+              </a>
+              <button
+                onClick={fetchArticles}
+                className="flex items-center gap-2 text-gray-300 hover:text-purple-400 transition-colors"
+                title="Refresh articles"
+              >
+                <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
+              </button>
             </div>
           </div>
         </div>
@@ -98,7 +146,27 @@ export default function PortfolioPage() {
           <p className="text-xl text-gray-400 max-w-2xl mx-auto">
             Insights on AI/ML, defense technology, strategic leadership, and innovation
           </p>
+          
+          {/* Debug info - remove in production */}
+          {process.env.NODE_ENV === 'development' && (
+            <div className="mt-4 text-sm text-gray-500">
+              Total articles loaded: {articles.length}
+            </div>
+          )}
         </motion.div>
+
+        {/* Error Display */}
+        {error && (
+          <div className="mb-8 p-4 bg-red-900/50 border border-red-500 rounded-lg text-red-200 text-center">
+            <p>Error loading articles: {error}</p>
+            <button
+              onClick={fetchArticles}
+              className="mt-2 px-4 py-2 bg-red-600 hover:bg-red-700 rounded transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
+        )}
 
         {/* Tag Filter */}
         {allTags.length > 0 && (
@@ -116,21 +184,24 @@ export default function PortfolioPage() {
                   : 'bg-slate-800 text-gray-400 hover:bg-slate-700'
               }`}
             >
-              All Topics
+              All Topics ({articles.length})
             </button>
-            {allTags.map(tag => (
-              <button
-                key={tag}
-                onClick={() => setSelectedTag(tag)}
-                className={`px-4 py-2 rounded-lg transition-all ${
-                  selectedTag === tag 
-                    ? 'bg-purple-600 text-white' 
-                    : 'bg-slate-800 text-gray-400 hover:bg-slate-700'
-                }`}
-              >
-                {tag}
-              </button>
-            ))}
+            {allTags.map(tag => {
+              const tagCount = articles.filter(a => a.tags?.includes(tag)).length
+              return (
+                <button
+                  key={tag}
+                  onClick={() => setSelectedTag(tag)}
+                  className={`px-4 py-2 rounded-lg transition-all ${
+                    selectedTag === tag 
+                      ? 'bg-purple-600 text-white' 
+                      : 'bg-slate-800 text-gray-400 hover:bg-slate-700'
+                  }`}
+                >
+                  {tag} ({tagCount})
+                </button>
+              )
+            })}
           </motion.div>
         )}
 
@@ -198,7 +269,7 @@ export default function PortfolioPage() {
                     {article.excerpt}
                   </p>
 
-                  {/* Meta Info - Subtle display */}
+                  {/* Meta Info */}
                   <div className="flex items-center gap-4 text-xs text-gray-600">
                     {article.publishedDate && (
                       <span className="flex items-center gap-1">
@@ -220,7 +291,7 @@ export default function PortfolioPage() {
         )}
 
         {/* Empty State */}
-        {!loading && filteredArticles.length === 0 && (
+        {!loading && !error && filteredArticles.length === 0 && (
           <div className="text-center py-12">
             <FileText className="w-16 h-16 text-gray-600 mx-auto mb-4" />
             <p className="text-gray-400">

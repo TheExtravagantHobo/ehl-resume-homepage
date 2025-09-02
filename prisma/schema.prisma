@@ -65,7 +65,6 @@ model Experience {
   order         Int
 }
 
-
 model Skill {
   id            String    @id @default(cuid())
   name          String
@@ -112,6 +111,19 @@ model Article {
   readTime      String?   // e.g., "8 min"
   tags          String[]  // Array of tags
   order         Int       // For manual ordering
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Showcase {
+  id            String    @id @default(cuid())
+  title         String
+  description   String    @db.Text
+  imageUrl      String?   @db.Text   // Base64 or URL for 1200x630 image
+  linkUrl       String    // Where the tile links to
+  linkType      String    @default("internal") // "internal", "external", or "mailto"
+  order         Int       // Display order (0-5)
+  isActive      Boolean   @default(true) // Enable/disable without deleting
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }

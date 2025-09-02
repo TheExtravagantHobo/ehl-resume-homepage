@@ -21,7 +21,12 @@ import {
   Upload,
   Eye,
   EyeOff,
-  Award
+  Award,
+  Grid3x3,
+  ExternalLink,
+  Link2,
+  Mail as MailIcon,
+  X
 } from 'lucide-react'
 import toast, { Toaster } from 'react-hot-toast'
 
@@ -29,6 +34,7 @@ export default function AdminPanel() {
   const { data: session, status } = useSession()
   const [activeTab, setActiveTab] = useState('general')
   const [resumeData, setResumeData] = useState<any>(null)
+  const [showcaseItems, setShowcaseItems] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [photoPreview, setPhotoPreview] = useState<string | null>(null)
@@ -37,6 +43,7 @@ export default function AdminPanel() {
   useEffect(() => {
     if (session) {
       loadResumeData()
+      loadShowcaseItems()
     }
   }, [session])
 
@@ -54,6 +61,7 @@ export default function AdminPanel() {
         publications: data.publications || [],
         languages: data.languages || [],
         articles: data.articles || [],
+        certifications: data.certifications || [],
         // Ensure basic fields exist
         name: data.name || '',
         title: data.title || '',
@@ -92,9 +100,95 @@ export default function AdminPanel() {
         skills: [],
         publications: [],
         languages: [],
-        articles: []
+        articles: [],
+        certifications: []
       })
       setLoading(false)
+    }
+  }
+
+  const loadShowcaseItems = async () => {
+    try {
+      const response = await fetch('/api/showcase')
+      const data = await response.json()
+      
+      console.log('Loaded showcase items from API:', data)
+      
+      // If no items exist, use defaults
+      if (!data || data.length === 0) {
+        const defaultItems = [
+          {
+            id: `showcase_${Date.now()}_0`,
+            title: 'Interactive Resume',
+            description: 'Explore my experience with an engaging, interactive timeline and expandable details.',
+            imageUrl: null,
+            linkUrl: '/resume',
+            linkType: 'internal',
+            order: 0,
+            isActive: true
+          },
+          {
+            id: `showcase_${Date.now()}_1`,
+            title: 'Portfolio',
+            description: 'View my projects spanning AI/ML, defense technology, and strategic consulting.',
+            imageUrl: null,
+            linkUrl: '/portfolio',
+            linkType: 'internal',
+            order: 1,
+            isActive: true
+          },
+          {
+            id: `showcase_${Date.now()}_2`,
+            title: 'Connect',
+            description: "Let's discuss how I can contribute to your organization's success.",
+            imageUrl: null,
+            linkUrl: 'mailto:admin@theextravaganthobo.com',
+            linkType: 'mailto',
+            order: 2,
+            isActive: true
+          }
+        ]
+        console.log('Using default showcase items')
+        setShowcaseItems(defaultItems)
+      } else {
+        setShowcaseItems(data)
+      }
+    } catch (error) {
+      console.error('Error loading showcase items:', error)
+      // Still provide defaults on error
+      const defaultItems = [
+        {
+          id: `showcase_${Date.now()}_0`,
+          title: 'Interactive Resume',
+          description: 'Explore my experience with an engaging, interactive timeline and expandable details.',
+          imageUrl: null,
+          linkUrl: '/resume',
+          linkType: 'internal',
+          order: 0,
+          isActive: true
+        },
+        {
+          id: `showcase_${Date.now()}_1`,
+          title: 'Portfolio',
+          description: 'View my projects spanning AI/ML, defense technology, and strategic consulting.',
+          imageUrl: null,
+          linkUrl: '/portfolio',
+          linkType: 'internal',
+          order: 1,
+          isActive: true
+        },
+        {
+          id: `showcase_${Date.now()}_2`,
+          title: 'Connect',
+          description: "Let's discuss how I can contribute to your organization's success.",
+          imageUrl: null,
+          linkUrl: 'mailto:admin@theextravaganthobo.com',
+          linkType: 'mailto',
+          order: 2,
+          isActive: true
+        }
+      ]
+      setShowcaseItems(defaultItems)
     }
   }
 
@@ -117,6 +211,33 @@ export default function AdminPanel() {
     setSaving(false)
   }
 
+  const saveShowcaseItems = async () => {
+    setSaving(true)
+    try {
+      console.log('Saving showcase items:', showcaseItems)
+      const response = await fetch('/api/showcase', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(showcaseItems)
+      })
+      
+      const result = await response.json()
+      console.log('Save response:', result)
+      
+      if (response.ok) {
+        toast.success('Showcase items saved successfully!')
+        // Reload to confirm save
+        await loadShowcaseItems()
+      } else {
+        toast.error(`Failed to save showcase items: ${result.error || 'Unknown error'}`)
+      }
+    } catch (error) {
+      console.error('Error saving showcase items:', error)
+      toast.error('Error saving showcase items')
+    }
+    setSaving(false)
+  }
+
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
@@ -125,6 +246,20 @@ export default function AdminPanel() {
         const base64 = reader.result as string
         setPhotoPreview(base64)
         setResumeData({ ...resumeData, photoUrl: base64 })
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleShowcaseImageUpload = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        const base64 = reader.result as string
+        const updated = [...showcaseItems]
+        updated[index].imageUrl = base64
+        setShowcaseItems(updated)
       }
       reader.readAsDataURL(file)
     }
@@ -165,10 +300,11 @@ export default function AdminPanel() {
 
   const tabs = [
     { id: 'general', label: 'General', icon: User },
+    { id: 'showcase', label: 'Showcase', icon: Grid3x3 },
     { id: 'experience', label: 'Experience', icon: Briefcase },
     { id: 'education', label: 'Education', icon: GraduationCap },
     { id: 'skills', label: 'Skills', icon: Code },
-    { id: 'certifications', label: 'Certifications', icon: Award }, // ADD THIS (import Award from lucide-react)
+    { id: 'certifications', label: 'Certifications', icon: Award },
     { id: 'publications', label: 'Publications', icon: FileText },
     { id: 'languages', label: 'Languages', icon: Globe },
     { id: 'articles', label: 'Articles', icon: FileText },
@@ -262,7 +398,7 @@ export default function AdminPanel() {
                         type="text"
                         value={resumeData.name || ''}
                         onChange={(e) => setResumeData({ ...resumeData, name: e.target.value })}
-                        className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900"
                       />
                     </div>
                     <div>
@@ -271,7 +407,7 @@ export default function AdminPanel() {
                         type="text"
                         value={resumeData.title || ''}
                         onChange={(e) => setResumeData({ ...resumeData, title: e.target.value })}
-                        className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900"
                       />
                     </div>
                   </div>
@@ -282,7 +418,7 @@ export default function AdminPanel() {
                       value={resumeData.bio || ''}
                       onChange={(e) => setResumeData({ ...resumeData, bio: e.target.value })}
                       rows={3}
-                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900"
                     />
                   </div>
 
@@ -293,7 +429,7 @@ export default function AdminPanel() {
                         type="email"
                         value={resumeData.email || ''}
                         onChange={(e) => setResumeData({ ...resumeData, email: e.target.value })}
-                        className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900"
                       />
                     </div>
                     <div>
@@ -302,7 +438,7 @@ export default function AdminPanel() {
                         type="text"
                         value={resumeData.signalUrl || ''}
                         onChange={(e) => setResumeData({ ...resumeData, signalUrl: e.target.value })}
-                        className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900"
                       />
                     </div>
                   </div>
@@ -314,7 +450,7 @@ export default function AdminPanel() {
                         type="text"
                         value={resumeData.linkedinPersonal || ''}
                         onChange={(e) => setResumeData({ ...resumeData, linkedinPersonal: e.target.value })}
-                        className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900"
                       />
                     </div>
                     <div>
@@ -323,10 +459,284 @@ export default function AdminPanel() {
                         type="text"
                         value={resumeData.linkedinBusiness || ''}
                         onChange={(e) => setResumeData({ ...resumeData, linkedinBusiness: e.target.value })}
-                        className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900"
                       />
                     </div>
                   </div>
+                </div>
+              )}
+
+              {/* Showcase Tab */}
+              {activeTab === 'showcase' && (
+                <div className="space-y-6">
+                  <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-xl font-bold">Showcase Items</h2>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={saveShowcaseItems}
+                        className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                      >
+                        <Save size={18} />
+                        Save Showcase
+                      </button>
+                      <button
+                        onClick={() => {
+                          if (showcaseItems.length >= 6) {
+                            toast.error('Maximum 6 showcase items allowed')
+                            return
+                          }
+                          const newItem = {
+                            id: `showcase_${Date.now()}`,
+                            title: '',
+                            description: '',
+                            imageUrl: null,
+                            linkUrl: '',
+                            linkType: 'internal',
+                            order: showcaseItems.length,
+                            isActive: true
+                          }
+                          setShowcaseItems([...showcaseItems, newItem])
+                        }}
+                        disabled={showcaseItems.length >= 6}
+                        className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      >
+                        <Plus size={18} />
+                        Add Item
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-3 text-sm text-blue-700">
+                    <p>Showcase items appear on the landing page. Upload 1200x630 images for best results. Maximum 6 items.</p>
+                  </div>
+
+                  {showcaseItems.map((item, index) => (
+                    <div key={item.id} className="border rounded-lg p-4 space-y-4">
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1 space-y-4">
+                          {/* Order and Active Toggle */}
+                          <div className="grid grid-cols-12 gap-4">
+                            <div className="col-span-2">
+                              <label className="block text-sm font-medium mb-1">Order</label>
+                              <input
+                                type="number"
+                                min="0"
+                                max="5"
+                                value={item.order}
+                                onChange={(e) => {
+                                  const updated = [...showcaseItems]
+                                  updated[index].order = parseInt(e.target.value) || 0
+                                  setShowcaseItems(updated)
+                                }}
+                                className="w-full px-3 py-2 border rounded-lg text-gray-900"
+                              />
+                            </div>
+                            <div className="col-span-4">
+                              <label className="block text-sm font-medium mb-1">Status</label>
+                              <label className="flex items-center gap-2 cursor-pointer mt-2">
+                                <input
+                                  type="checkbox"
+                                  checked={item.isActive}
+                                  onChange={(e) => {
+                                    const updated = [...showcaseItems]
+                                    updated[index].isActive = e.target.checked
+                                    setShowcaseItems(updated)
+                                  }}
+                                  className="text-purple-600"
+                                />
+                                <span className={item.isActive ? 'text-green-600' : 'text-gray-500'}>
+                                  {item.isActive ? 'Active' : 'Inactive'}
+                                </span>
+                              </label>
+                            </div>
+                            <div className="col-span-6">
+                              <label className="block text-sm font-medium mb-1">Title*</label>
+                              <input
+                                type="text"
+                                placeholder="Interactive Resume"
+                                value={item.title}
+                                onChange={(e) => {
+                                  const updated = [...showcaseItems]
+                                  updated[index].title = e.target.value
+                                  setShowcaseItems(updated)
+                                }}
+                                className="w-full px-3 py-2 border rounded-lg text-gray-900"
+                              />
+                            </div>
+                          </div>
+
+                          {/* Description */}
+                          <div>
+                            <label className="block text-sm font-medium mb-1">Description*</label>
+                            <textarea
+                              placeholder="Brief description of this showcase item..."
+                              value={item.description}
+                              onChange={(e) => {
+                                const updated = [...showcaseItems]
+                                updated[index].description = e.target.value
+                                setShowcaseItems(updated)
+                              }}
+                              rows={2}
+                              className="w-full px-3 py-2 border rounded-lg text-gray-900"
+                            />
+                          </div>
+
+                          {/* Image Upload */}
+                          <div>
+                            <label className="block text-sm font-medium mb-1">
+                              Header Image (1200x630 recommended)
+                            </label>
+                            <div className="flex items-start gap-4">
+                              {item.imageUrl && (
+                                <div className="relative w-48 aspect-[1200/630] rounded-lg overflow-hidden bg-gray-200">
+                                  <img 
+                                    src={item.imageUrl} 
+                                    alt="Showcase" 
+                                    className="w-full h-full object-cover"
+                                  />
+                                  <button
+                                    onClick={() => {
+                                      const updated = [...showcaseItems]
+                                      updated[index].imageUrl = null
+                                      setShowcaseItems(updated)
+                                    }}
+                                    className="absolute top-1 right-1 bg-red-600 text-white p-1 rounded hover:bg-red-700"
+                                  >
+                                    <X size={16} />
+                                  </button>
+                                </div>
+                              )}
+                              <div className="flex-1">
+                                <label className="cursor-pointer bg-gray-100 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors inline-flex items-center gap-2">
+                                  <Upload size={18} />
+                                  Upload Image
+                                  <input 
+                                    type="file" 
+                                    accept="image/*" 
+                                    onChange={(e) => handleShowcaseImageUpload(index, e)}
+                                    className="hidden" 
+                                  />
+                                </label>
+                                <p className="text-xs text-gray-500 mt-1">
+                                  Or paste image URL below:
+                                </p>
+                                <input
+                                  type="text"
+                                  placeholder="https://example.com/image.jpg"
+                                  value={typeof item.imageUrl === 'string' && !item.imageUrl.startsWith('data:') ? item.imageUrl : ''}
+                                  onChange={(e) => {
+                                    const updated = [...showcaseItems]
+                                    updated[index].imageUrl = e.target.value
+                                    setShowcaseItems(updated)
+                                  }}
+                                  className="w-full px-3 py-2 border rounded-lg text-gray-900 mt-2"
+                                />
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Link Settings */}
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-sm font-medium mb-1">Link URL*</label>
+                              <input
+                                type="text"
+                                placeholder="/resume or https://example.com"
+                                value={item.linkUrl}
+                                onChange={(e) => {
+                                  const updated = [...showcaseItems]
+                                  updated[index].linkUrl = e.target.value
+                                  setShowcaseItems(updated)
+                                }}
+                                className="w-full px-3 py-2 border rounded-lg text-gray-900"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium mb-1">Link Type</label>
+                              <select
+                                value={item.linkType}
+                                onChange={(e) => {
+                                  const updated = [...showcaseItems]
+                                  updated[index].linkType = e.target.value
+                                  setShowcaseItems(updated)
+                                }}
+                                className="w-full px-3 py-2 border rounded-lg text-gray-900"
+                              >
+                                <option value="internal">Internal Link</option>
+                                <option value="external">External Link (new tab)</option>
+                                <option value="mailto">Email (mailto:)</option>
+                              </select>
+                            </div>
+                          </div>
+
+                          {/* Link Type Helper */}
+                          <div className="text-xs text-gray-500 flex items-center gap-1">
+                            {item.linkType === 'internal' && (
+                              <>
+                                <Link2 size={14} />
+                                <span>Links to a page within your site (e.g., /resume)</span>
+                              </>
+                            )}
+                            {item.linkType === 'external' && (
+                              <>
+                                <ExternalLink size={14} />
+                                <span>Opens external URL in new tab</span>
+                              </>
+                            )}
+                            {item.linkType === 'mailto' && (
+                              <>
+                                <MailIcon size={14} />
+                                <span>Opens email client (e.g., mailto:email@example.com)</span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Action buttons */}
+                        <div className="flex flex-col gap-2 ml-4">
+                          <button
+                            onClick={() => {
+                              const updated = showcaseItems.filter((_, i) => i !== index)
+                              setShowcaseItems(updated)
+                            }}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (index > 0) {
+                                const updated = [...showcaseItems]
+                                const temp = updated[index]
+                                updated[index] = updated[index - 1]
+                                updated[index - 1] = temp
+                                setShowcaseItems(updated)
+                              }
+                            }}
+                            disabled={index === 0}
+                            className="text-gray-600 hover:text-gray-700 disabled:opacity-30"
+                          >
+                            <ArrowUp size={18} />
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (index < showcaseItems.length - 1) {
+                                const updated = [...showcaseItems]
+                                const temp = updated[index]
+                                updated[index] = updated[index + 1]
+                                updated[index + 1] = temp
+                                setShowcaseItems(updated)
+                              }
+                            }}
+                            disabled={index === showcaseItems.length - 1}
+                            className="text-gray-600 hover:text-gray-700 disabled:opacity-30"
+                          >
+                            <ArrowDown size={18} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
 
@@ -380,7 +790,7 @@ export default function AdminPanel() {
                                 updated[index].jobTitle = e.target.value
                                 setResumeData({ ...resumeData, experiences: updated })
                               }}
-                              className="px-3 py-2 border rounded-lg"
+                              className="px-3 py-2 border rounded-lg text-gray-900"
                             />
                             <input
                               type="text"
@@ -391,7 +801,7 @@ export default function AdminPanel() {
                                 updated[index].company = e.target.value
                                 setResumeData({ ...resumeData, experiences: updated })
                               }}
-                              className="px-3 py-2 border rounded-lg"
+                              className="px-3 py-2 border rounded-lg text-gray-900"
                             />
                           </div>
 
@@ -409,7 +819,7 @@ export default function AdminPanel() {
                                     updated[index].startDate = e.target.value
                                     setResumeData({ ...resumeData, experiences: updated })
                                   }}
-                                  className="w-full px-3 py-2 border rounded-lg"
+                                  className="w-full px-3 py-2 border rounded-lg text-gray-900"
                                 />
                               </div>
                               <div>
@@ -424,7 +834,7 @@ export default function AdminPanel() {
                                     setResumeData({ ...resumeData, experiences: updated })
                                   }}
                                   disabled={exp.isCurrent}
-                                  className="w-full px-3 py-2 border rounded-lg disabled:bg-gray-100"
+                                  className="w-full px-3 py-2 border rounded-lg disabled:bg-gray-100 text-gray-900"
                                 />
                               </div>
                               <div className="flex items-end">
@@ -515,7 +925,7 @@ export default function AdminPanel() {
                                   updated[index].street = e.target.value
                                   setResumeData({ ...resumeData, experiences: updated })
                                 }}
-                                className="px-3 py-2 border rounded-lg"
+                                className="px-3 py-2 border rounded-lg text-gray-900"
                               />
                               <input
                                 type="text"
@@ -526,7 +936,7 @@ export default function AdminPanel() {
                                   updated[index].city = e.target.value
                                   setResumeData({ ...resumeData, experiences: updated })
                                 }}
-                                className="px-3 py-2 border rounded-lg"
+                                className="px-3 py-2 border rounded-lg text-gray-900"
                               />
                               <input
                                 type="text"
@@ -537,7 +947,7 @@ export default function AdminPanel() {
                                   updated[index].state = e.target.value
                                   setResumeData({ ...resumeData, experiences: updated })
                                 }}
-                                className="px-3 py-2 border rounded-lg"
+                                className="px-3 py-2 border rounded-lg text-gray-900"
                               />
                               <input
                                 type="text"
@@ -548,7 +958,7 @@ export default function AdminPanel() {
                                   updated[index].zipCode = e.target.value
                                   setResumeData({ ...resumeData, experiences: updated })
                                 }}
-                                className="px-3 py-2 border rounded-lg"
+                                className="px-3 py-2 border rounded-lg text-gray-900"
                               />
                             </div>
                           </div>
@@ -568,7 +978,7 @@ export default function AdminPanel() {
                                   updated[index].duties[i] = e.target.value
                                   setResumeData({ ...resumeData, experiences: updated })
                                 }}
-                                className="w-full px-3 py-2 border rounded-lg mb-2"
+                                className="w-full px-3 py-2 border rounded-lg mb-2 text-gray-900"
                               />
                             ))}
                           </div>
@@ -586,7 +996,7 @@ export default function AdminPanel() {
                                     setResumeData({ ...resumeData, experiences: updated })
                                   }}
                                   rows={2}
-                                  className="flex-1 px-3 py-2 border rounded-lg"
+                                  className="flex-1 px-3 py-2 border rounded-lg text-gray-900"
                                 />
                                 <button
                                   onClick={() => {
@@ -702,7 +1112,7 @@ export default function AdminPanel() {
                               updated[index].schoolName = e.target.value
                               setResumeData({ ...resumeData, education: updated })
                             }}
-                            className="px-3 py-2 border rounded-lg"
+                            className="px-3 py-2 border rounded-lg text-gray-900"
                           />
                           <input
                             type="text"
@@ -713,7 +1123,7 @@ export default function AdminPanel() {
                               updated[index].degree = e.target.value
                               setResumeData({ ...resumeData, education: updated })
                             }}
-                            className="px-3 py-2 border rounded-lg"
+                            className="px-3 py-2 border rounded-lg text-gray-900"
                           />
                           <input
                             type="text"
@@ -724,7 +1134,7 @@ export default function AdminPanel() {
                               updated[index].major = e.target.value
                               setResumeData({ ...resumeData, education: updated })
                             }}
-                            className="px-3 py-2 border rounded-lg"
+                            className="px-3 py-2 border rounded-lg text-gray-900"
                           />
                           <input
                             type="text"
@@ -735,7 +1145,7 @@ export default function AdminPanel() {
                               updated[index].location = e.target.value
                               setResumeData({ ...resumeData, education: updated })
                             }}
-                            className="px-3 py-2 border rounded-lg"
+                            className="px-3 py-2 border rounded-lg text-gray-900"
                           />
                           <input
                             type="text"
@@ -746,7 +1156,7 @@ export default function AdminPanel() {
                               updated[index].yearsAttended = e.target.value
                               setResumeData({ ...resumeData, education: updated })
                             }}
-                            className="px-3 py-2 border rounded-lg col-span-2"
+                            className="px-3 py-2 border rounded-lg col-span-2 text-gray-900"
                           />
                         </div>
                         <button
@@ -803,7 +1213,7 @@ export default function AdminPanel() {
                               updated[index].name = e.target.value
                               setResumeData({ ...resumeData, skills: updated })
                             }}
-                            className="px-3 py-2 border rounded-lg"
+                            className="px-3 py-2 border rounded-lg text-gray-900"
                           />
                           <div>
                             <label className="block text-sm text-gray-600 mb-1">Level (1-10)</label>
@@ -830,7 +1240,7 @@ export default function AdminPanel() {
                               updated[index].hoverText = e.target.value
                               setResumeData({ ...resumeData, skills: updated })
                             }}
-                            className="px-3 py-2 border rounded-lg"
+                            className="px-3 py-2 border rounded-lg text-gray-900"
                           />
                         </div>
                         <button
@@ -894,7 +1304,7 @@ export default function AdminPanel() {
                                   updated[index].name = e.target.value
                                   setResumeData({ ...resumeData, certifications: updated })
                                 }}
-                                className="w-full px-3 py-2 border rounded-lg"
+                                className="w-full px-3 py-2 border rounded-lg text-gray-900"
                               />
                             </div>
                             <div>
@@ -908,7 +1318,7 @@ export default function AdminPanel() {
                                   updated[index].agency = e.target.value
                                   setResumeData({ ...resumeData, certifications: updated })
                                 }}
-                                className="w-full px-3 py-2 border rounded-lg"
+                                className="w-full px-3 py-2 border rounded-lg text-gray-900"
                               />
                             </div>
                           </div>
@@ -926,7 +1336,7 @@ export default function AdminPanel() {
                                   updated[index].certNumber = e.target.value
                                   setResumeData({ ...resumeData, certifications: updated })
                                 }}
-                                className="w-full px-3 py-2 border rounded-lg"
+                                className="w-full px-3 py-2 border rounded-lg text-gray-900"
                               />
                             </div>
                             <div>
@@ -939,7 +1349,7 @@ export default function AdminPanel() {
                                   updated[index].certDate = e.target.value
                                   setResumeData({ ...resumeData, certifications: updated })
                                 }}
-                                className="w-full px-3 py-2 border rounded-lg"
+                                className="w-full px-3 py-2 border rounded-lg text-gray-900"
                               />
                             </div>
                           </div>
@@ -957,7 +1367,7 @@ export default function AdminPanel() {
                                   updated[index].agencyUrl = e.target.value
                                   setResumeData({ ...resumeData, certifications: updated })
                                 }}
-                                className="w-full px-3 py-2 border rounded-lg"
+                                className="w-full px-3 py-2 border rounded-lg text-gray-900"
                               />
                             </div>
                             <div>
@@ -975,7 +1385,7 @@ export default function AdminPanel() {
                                     updated[index].iconUrl = e.target.value
                                     setResumeData({ ...resumeData, certifications: updated })
                                   }}
-                                  className="flex-1 px-3 py-2 border rounded-lg"
+                                  className="flex-1 px-3 py-2 border rounded-lg text-gray-900"
                                 />
                                 <label className="cursor-pointer bg-gray-100 px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors">
                                   <Upload size={18} />
@@ -1088,7 +1498,7 @@ export default function AdminPanel() {
                               updated[index].title = e.target.value
                               setResumeData({ ...resumeData, publications: updated })
                             }}
-                            className="px-3 py-2 border rounded-lg col-span-3"
+                            className="px-3 py-2 border rounded-lg col-span-3 text-gray-900"
                           />
                           <input
                             type="text"
@@ -1099,7 +1509,7 @@ export default function AdminPanel() {
                               updated[index].year = e.target.value
                               setResumeData({ ...resumeData, publications: updated })
                             }}
-                            className="px-3 py-2 border rounded-lg"
+                            className="px-3 py-2 border rounded-lg text-gray-900"
                           />
                         </div>
                         <button
@@ -1155,7 +1565,7 @@ export default function AdminPanel() {
                               updated[index].name = e.target.value
                               setResumeData({ ...resumeData, languages: updated })
                             }}
-                            className="px-3 py-2 border rounded-lg"
+                            className="px-3 py-2 border rounded-lg text-gray-900"
                           />
                           <input
                             type="text"
@@ -1166,7 +1576,7 @@ export default function AdminPanel() {
                               updated[index].proficiency = e.target.value
                               setResumeData({ ...resumeData, languages: updated })
                             }}
-                            className="px-3 py-2 border rounded-lg"
+                            className="px-3 py-2 border rounded-lg text-gray-900"
                           />
                         </div>
                         <button
@@ -1189,34 +1599,64 @@ export default function AdminPanel() {
                 <div className="space-y-6">
                   <div className="flex justify-between items-center mb-4">
                     <h2 className="text-xl font-bold">LinkedIn Articles</h2>
-                    <button
-                      onClick={() => {
-                        const newArticle = {
-                          id: Date.now().toString(),
-                          title: '',
-                          subtitle: '',
-                          excerpt: '',
-                          url: '',
-                          ogImageUrl: '',
-                          publishedDate: new Date().toISOString().split('T')[0],
-                          readTime: '',
-                          tags: [],
-                          order: (resumeData.articles || []).length
-                        }
-                        setResumeData({
-                          ...resumeData,
-                          articles: [...(resumeData.articles || []), newArticle]
-                        })
-                      }}
-                      className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700"
-                    >
-                      <Plus size={18} />
-                      Add Article
-                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={async () => {
+                          // Save only articles
+                          try {
+                            const response = await fetch('/api/portfolio', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify(resumeData.articles || [])
+                            })
+                            if (response.ok) {
+                              toast.success('Articles saved successfully!')
+                            } else {
+                              toast.error('Failed to save articles')
+                            }
+                          } catch (error) {
+                            toast.error('Error saving articles')
+                          }
+                        }}
+                        className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                      >
+                        <Save size={18} />
+                        Save Articles
+                      </button>
+                      <button
+                        onClick={() => {
+                          const newArticle = {
+                            id: Date.now().toString(),
+                            title: '',
+                            subtitle: '',
+                            excerpt: '',
+                            url: '',
+                            ogImageUrl: '',
+                            publishedDate: new Date().toISOString().split('T')[0],
+                            readTime: '',
+                            tags: [],
+                            order: (resumeData.articles || []).length
+                          }
+                          setResumeData({
+                            ...resumeData,
+                            articles: [...(resumeData.articles || []), newArticle]
+                          })
+                        }}
+                        className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700"
+                      >
+                        <Plus size={18} />
+                        Add Article
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Article count info */}
+                  <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-3 text-sm text-blue-700">
+                    <p>Managing {resumeData.articles?.length || 0} articles. Remember to save after making changes!</p>
                   </div>
 
                   {resumeData.articles?.map((article: any, index: number) => (
-                    <div key={article.id} className="border rounded-lg p-4 space-y-4">
+                    <div key={article.id} className="border rounded-lg p-4 space-y-4 bg-white/5">
                       <div className="flex justify-between items-start">
                         <div className="flex-1 space-y-4">
                           {/* Order and Title */}
@@ -1232,7 +1672,7 @@ export default function AdminPanel() {
                                   updated[index].order = parseInt(e.target.value) || 0
                                   setResumeData({ ...resumeData, articles: updated })
                                 }}
-                                className="w-full px-3 py-2 border rounded-lg"
+                                className="w-full px-3 py-2 border rounded-lg text-gray-900"
                               />
                             </div>
                             <div className="col-span-10">
@@ -1246,7 +1686,7 @@ export default function AdminPanel() {
                                   updated[index].title = e.target.value
                                   setResumeData({ ...resumeData, articles: updated })
                                 }}
-                                className="w-full px-3 py-2 border rounded-lg"
+                                className="w-full px-3 py-2 border rounded-lg text-gray-900"
                               />
                             </div>
                           </div>
@@ -1263,7 +1703,7 @@ export default function AdminPanel() {
                                 updated[index].subtitle = e.target.value
                                 setResumeData({ ...resumeData, articles: updated })
                               }}
-                              className="w-full px-3 py-2 border rounded-lg"
+                              className="w-full px-3 py-2 border rounded-lg text-gray-900"
                             />
                           </div>
 
@@ -1279,7 +1719,7 @@ export default function AdminPanel() {
                                 setResumeData({ ...resumeData, articles: updated })
                               }}
                               rows={3}
-                              className="w-full px-3 py-2 border rounded-lg"
+                              className="w-full px-3 py-2 border rounded-lg text-gray-900"
                             />
                           </div>
 
@@ -1296,7 +1736,7 @@ export default function AdminPanel() {
                                   updated[index].url = e.target.value
                                   setResumeData({ ...resumeData, articles: updated })
                                 }}
-                                className="w-full px-3 py-2 border rounded-lg"
+                                className="w-full px-3 py-2 border rounded-lg text-gray-900"
                               />
                             </div>
                             <div>
@@ -1310,7 +1750,7 @@ export default function AdminPanel() {
                                   updated[index].ogImageUrl = e.target.value
                                   setResumeData({ ...resumeData, articles: updated })
                                 }}
-                                className="w-full px-3 py-2 border rounded-lg"
+                                className="w-full px-3 py-2 border rounded-lg text-gray-900"
                               />
                             </div>
                           </div>
@@ -1327,7 +1767,7 @@ export default function AdminPanel() {
                                   updated[index].publishedDate = e.target.value
                                   setResumeData({ ...resumeData, articles: updated })
                                 }}
-                                className="w-full px-3 py-2 border rounded-lg"
+                                className="w-full px-3 py-2 border rounded-lg text-gray-900"
                               />
                             </div>
                             <div>
@@ -1341,7 +1781,7 @@ export default function AdminPanel() {
                                   updated[index].readTime = e.target.value
                                   setResumeData({ ...resumeData, articles: updated })
                                 }}
-                                className="w-full px-3 py-2 border rounded-lg"
+                                className="w-full px-3 py-2 border rounded-lg text-gray-900"
                               />
                             </div>
                           </div>
@@ -1358,21 +1798,53 @@ export default function AdminPanel() {
                                 updated[index].tags = e.target.value.split(',').map((tag: string) => tag.trim()).filter(Boolean)
                                 setResumeData({ ...resumeData, articles: updated })
                               }}
-                              className="w-full px-3 py-2 border rounded-lg"
+                              className="w-full px-3 py-2 border rounded-lg text-gray-900"
                             />
                           </div>
                         </div>
 
-                        {/* Delete button */}
-                        <button
-                          onClick={() => {
-                            const updated = resumeData.articles.filter((_: any, i: number) => i !== index)
-                            setResumeData({ ...resumeData, articles: updated })
-                          }}
-                          className="text-red-600 hover:text-red-700 ml-4"
-                        >
-                          <Trash2 size={18} />
-                        </button>
+                        {/* Action buttons */}
+                        <div className="flex flex-col gap-2 ml-4">
+                          <button
+                            onClick={() => {
+                              const updated = resumeData.articles.filter((_: any, i: number) => i !== index)
+                              setResumeData({ ...resumeData, articles: updated })
+                            }}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (index > 0) {
+                                const updated = [...resumeData.articles]
+                                const temp = updated[index]
+                                updated[index] = updated[index - 1]
+                                updated[index - 1] = temp
+                                setResumeData({ ...resumeData, articles: updated })
+                              }
+                            }}
+                            disabled={index === 0}
+                            className="text-gray-600 hover:text-gray-700 disabled:opacity-30"
+                          >
+                            <ArrowUp size={18} />
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (index < resumeData.articles.length - 1) {
+                                const updated = [...resumeData.articles]
+                                const temp = updated[index]
+                                updated[index] = updated[index + 1]
+                                updated[index + 1] = temp
+                                setResumeData({ ...resumeData, articles: updated })
+                              }
+                            }}
+                            disabled={index === resumeData.articles.length - 1}
+                            className="text-gray-600 hover:text-gray-700 disabled:opacity-30"
+                          >
+                            <ArrowDown size={18} />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -1407,14 +1879,14 @@ export default function AdminPanel() {
                             placeholder="Mission Title (e.g., 'Mission')"
                             value={resumeData.missionTitle || ''}
                             onChange={(e) => setResumeData({ ...resumeData, missionTitle: e.target.value })}
-                            className="w-full px-3 py-2 border rounded-lg"
+                            className="w-full px-3 py-2 border rounded-lg text-gray-900"
                           />
                           <textarea
                             placeholder="Mission Text"
                             value={resumeData.missionText || ''}
                             onChange={(e) => setResumeData({ ...resumeData, missionText: e.target.value })}
                             rows={4}
-                            className="w-full px-3 py-2 border rounded-lg"
+                            className="w-full px-3 py-2 border rounded-lg text-gray-900"
                           />
                         </>
                       )}
