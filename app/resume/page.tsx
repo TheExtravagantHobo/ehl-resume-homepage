@@ -173,7 +173,7 @@ export default function ResumePage() {
                 <Briefcase size={18} />
                 Portfolio
               </Link>
-              <a href="mailto:admin@theextravaganthobo.com" className="text-gray-300 hover:text-purple-400 transition-colors flex items-center gap-2">
+              <a href="mailto:admin@sitename.com" className="text-gray-300 hover:text-purple-400 transition-colors flex items-center gap-2">
                 <Mail size={18} />
                 Contact
               </a>

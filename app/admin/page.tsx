@@ -142,7 +142,7 @@ export default function AdminPanel() {
             title: 'Connect',
             description: "Let's discuss how I can contribute to your organization's success.",
             imageUrl: null,
-            linkUrl: 'mailto:admin@theextravaganthobo.com',
+            linkUrl: 'mailto:admin@sitename.com',
             linkType: 'mailto',
             order: 2,
             isActive: true
@@ -182,7 +182,7 @@ export default function AdminPanel() {
           title: 'Connect',
           description: "Let's discuss how I can contribute to your organization's success.",
           imageUrl: null,
-          linkUrl: 'mailto:admin@theextravaganthobo.com',
+          linkUrl: 'mailto:admin@sitename.com',
           linkType: 'mailto',
           order: 2,
           isActive: true

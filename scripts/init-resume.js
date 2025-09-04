@@ -10,13 +10,13 @@ async function main() {
     update: {},
     create: {
       id: 'default',
-      name: 'Alex Sonne',
+      name: 'Name Name',
       title: 'TX Resident • Relocating',
       bio: 'Strategic leader bridging technology and policy with expertise in AI/ML, defense tech, and program management.',
-      email: 'admin@theextravaganthobo.com',
-      signalUrl: 'https://signal.me/#eu/bcnUjsA0r099kIP8lX0v5b4xvcIDQzDSGWUC75cecgZjiihZa3BG7pFAnz_DD4Zz',
-      linkedinPersonal: 'https://www.linkedin.com/in/alexsonne/',
-      linkedinBusiness: 'https://www.linkedin.com/company/theextravaganthobo/',
+      email: 'admin@sitename.com',
+      signalUrl: 'https://signal.me/',
+      linkedinPersonal: 'https://www.linkedin.com/in/namename/',
+      linkedinBusiness: 'https://www.linkedin.com/company/sitename/',
       showMission: false,
       missionTitle: 'Mission',
       missionText: ''

@@ -7,20 +7,20 @@ import { Providers } from '@/components/Providers'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Alex Sonne - The Extravagant Hobo',
+  title: 'Name Name - Title Title',
   description: 'Strategic leader bridging technology and policy with expertise in AI/ML, defense tech, and innovation management.',
-  metadataBase: new URL('https://www.theextravaganthobo.com/'),
+  metadataBase: new URL('https://www.yoursite.com/'),
   openGraph: {
-    title: 'Alex Sonne - Strategic Leader in Technology and Policy',
+    title: 'Name Name - Strategic Leader in Technology and Policy',
     description: 'Strategic leader bridging technology and policy with expertise in AI/ML, defense tech, and innovation management.',
-    url: 'https://www.theextravaganthobo.com/',
-    siteName: 'The Extravagant Hobo',
+    url: 'https://www.yoursite.com/',
+    siteName: 'Site Name',
     images: [
       {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'Alex Sonne - The Extravagant Hobo',
+        alt: 'Name Name - Site Name',
       }
     ],
     locale: 'en_US',
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Alex Sonne - Strategic Leader',
+    title: 'Name Name - Strategic Leader',
     description: 'Strategic leader in AI/ML, defense tech, and innovation management',
     images: ['/og-image.png'],
   },

@@ -55,7 +55,7 @@ export default function LandingPage() {
             title: 'Connect',
             description: "Let's discuss how I can contribute to your organization's success.",
             imageUrl: null,
-            linkUrl: 'mailto:admin@theextravaganthobo.com',
+            linkUrl: 'mailto:admin@sitename.com',
             linkType: 'mailto',
             order: 2,
             isActive: true
@@ -111,7 +111,7 @@ export default function LandingPage() {
                 <Briefcase size={18} />
                 Portfolio
               </Link>
-              <a href="mailto:admin@theextravaganthobo.com" className="text-gray-300 hover:text-purple-400 transition-colors flex items-center gap-2">
+              <a href="mailto:admin@sitename.com" className="text-gray-300 hover:text-purple-400 transition-colors flex items-center gap-2">
                 <Mail size={18} />
                 Contact
               </a>
@@ -126,7 +126,7 @@ export default function LandingPage() {
           <div className="text-center">
             <h1 className="text-5xl md:text-7xl font-bold mb-6">
               <span className="bg-gradient-to-r from-purple-400 via-blue-400 to-cyan-400 bg-clip-text text-transparent">
-                Alex Sonne
+                Name Name
               </span>
             </h1>
             <p className="text-xl md:text-2xl text-gray-400 mb-8 max-w-2xl mx-auto">
@@ -137,7 +137,7 @@ export default function LandingPage() {
                 View Resume
                 <ArrowRight className="group-hover:translate-x-1 transition-transform" size={18} />
               </Link>
-              <a href="mailto:admin@theextravaganthobo.com" className="px-6 py-3 border-2 border-purple-600 text-purple-400 rounded-lg hover:bg-purple-950 transition-all duration-300">
+              <a href="mailto:admin@sitename.com" className="px-6 py-3 border-2 border-purple-600 text-purple-400 rounded-lg hover:bg-purple-950 transition-all duration-300">
                 Get in Touch
               </a>
             </div>

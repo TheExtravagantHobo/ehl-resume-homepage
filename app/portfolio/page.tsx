@@ -115,7 +115,7 @@ export default function PortfolioPage() {
                 <Briefcase size={18} />
                 Portfolio
               </Link>
-              <a href="mailto:admin@theextravaganthobo.com" className="text-gray-300 hover:text-purple-400 transition-colors flex items-center gap-2">
+              <a href="mailto:admin@sitename.com" className="text-gray-300 hover:text-purple-400 transition-colors flex items-center gap-2">
                 <Mail size={18} />
                 Contact
               </a>
@@ -314,7 +314,7 @@ export default function PortfolioPage() {
               Want to connect and discuss these topics?
             </p>
             <a
-              href="https://www.linkedin.com/in/alexsonne/"
+              href="https://www.linkedin.com/in/profile/"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:shadow-xl transition-all hover:scale-105"

@@ -9,10 +9,10 @@ async function main() {
   const hashedPassword = await bcrypt.hash('ChooseAStrongPasswordHere', 10)
   
   await prisma.user.upsert({
-    where: { email: 'admin@theextravaganthobo.com' },
+    where: { email: 'admin@sitename.com' },
     update: {},
     create: {
-      email: 'admin@theextravaganthobo.com',
+      email: 'admin@sitename.com',
       password: hashedPassword,
     },
   })
@@ -20,13 +20,13 @@ async function main() {
   // Create initial resume data
   await prisma.resume.create({
     data: {
-      name: 'Alex Sonne',
+      name: 'Name Name',
       title: 'TX Resident • Relocating',
       bio: 'Strategic leader bridging technology and policy with expertise in AI/ML, defense tech, and program management.',
-      email: 'admin@theextravaganthobo.com',
-      signalUrl: 'https://signal.me/#eu/bcnUjsA0r099kIP8lX0v5b4xvcIDQzDSGWUC75cecgZjiihZa3BG7pFAnz_DD4Zz',
-      linkedinPersonal: 'https://www.linkedin.com/in/alexsonne/',
-      linkedinBusiness: 'https://www.linkedin.com/company/theextravaganthobo/',
+      email: 'admin@sitename.com',
+      signalUrl: 'https://signal.me/',
+      linkedinPersonal: 'https://www.linkedin.com/in/NameName/',
+      linkedinBusiness: 'https://www.linkedin.com/company/sitename/',
       theme: 'light-modern',
     },
   })

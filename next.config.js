@@ -2,7 +2,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ['localhost', 'theextravaganthobo.com', 'admin.theextravaganthobo.com'],
+    domains: ['localhost', 'sitename.com', 'admin.sitename.com'],
   },
   async rewrites() {
     return [
@@ -12,7 +12,7 @@ const nextConfig = {
         has: [
           {
             type: 'host',
-            value: 'admin.theextravaganthobo.com',
+            value: 'admin.sitename.com',
           },
         ],
       },
