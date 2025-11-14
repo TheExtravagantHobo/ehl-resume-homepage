@@ -138,6 +138,20 @@ The template uses semantic naming:
 - **Orange**: `#F59E0B` and `#FBBF24`
 - **Pink**: `#EC4899` and `#F472B6`
 
+### Favicons & Branding Assets
+
+The template does not include favicons by default. You'll need to add your own:
+
+1. **Generate Favicons**: Use a tool like [favicon.io](https://favicon.io/) or [realfavicongenerator.net](https://realfavicongenerator.net/)
+2. **Add to `/public`**:
+   - `favicon.ico` (32x32)
+   - `favicon-16x16.png`
+   - `favicon-32x32.png`
+   - `apple-touch-icon.png` (180x180)
+3. **Optional**: Add `og-image.png` (1200x630) for social media sharing
+
+**Tip**: Use your brand colors from `globals.css` when creating favicons for consistency.
+
 ### Personal Information
 
 1. **Login**: Visit `/admin` with the seeded credentials
