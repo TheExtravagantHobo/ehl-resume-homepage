@@ -1,0 +1,129 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Resume {
+  id            String    @id @default(cuid())
+  name          String
+  title         String
+  bio           String?
+  photoUrl      String?
+  email         String
+  signalUrl     String?
+  linkedinPersonal String?
+  linkedinBusiness String?
+  theme         String    @default("light-modern")
+  showMission   Boolean   @default(false)
+  missionTitle  String?
+  missionText   String?
+  updatedAt     DateTime  @updatedAt
+}
+
+model Education {
+  id            String    @id @default(cuid())
+  schoolName    String
+  degree        String
+  major         String
+  location      String
+  yearsAttended String
+  order         Int
+}
+
+model Experience {
+  id            String    @id @default(cuid())
+  jobTitle      String
+  company       String
+  duties        String[]  // 3 short duties
+  fullBullets   String[]  // All bullets for expanded view
+  workLocation  String?   // "remote", "hybrid", or null for in-person
+  // New date fields
+  startDate     DateTime  // Full start date
+  endDate       DateTime? // Full end date (null if current)
+  isCurrent     Boolean   @default(false)
+  dateRange     String    // Keep for backward compatibility, will compute from dates
+  // New address fields (not displayed on resume)
+  street        String?
+  city          String?
+  state         String?
+  zipCode       String?
+  order         Int
+}
+
+model Skill {
+  id            String    @id @default(cuid())
+  name          String
+  level         Int       // 1-10
+  hoverText     String?   // "5 years" or "Expert"
+  order         Int
+}
+
+model Publication {
+  id            String    @id @default(cuid())
+  title         String
+  year          String
+  order         Int
+}
+
+model Language {
+  id            String    @id @default(cuid())
+  name          String
+  proficiency   String
+  order         Int
+}
+
+model Certification {
+  id                String    @id @default(cuid())
+  name              String    // Certification name
+  agency            String    // Certifying agency/institution
+  certNumber        String?   // Certification number (optional)
+  certDate          DateTime  // Certification date
+  agencyUrl         String?   // Agency website URL
+  iconUrl           String?   // Icon URL or base64 image
+  order             Int       // Display order
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+model Article {
+  id            String    @id @default(cuid())
+  title         String
+  subtitle      String?
+  excerpt       String    @db.Text
+  url           String
+  ogImageUrl    String?   @db.Text // Vercel Blob URL for article cover image
+  publishedDate DateTime
+  readTime      String?   // e.g., "8 min"
+  tags          String[]  // Array of tags
+  order         Int       // For manual ordering
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Showcase {
+  id            String    @id @default(cuid())
+  title         String
+  description   String    @db.Text
+  imageUrl      String?   @db.Text   // Vercel Blob URL for showcase tile image (1200x630)
+  linkUrl       String    // Where the tile links to
+  linkType      String    @default("internal") // "internal", "external", or "mailto"
+  order         Int       // Display order (0-5)
+  isActive      Boolean   @default(true) // Enable/disable without deleting
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
