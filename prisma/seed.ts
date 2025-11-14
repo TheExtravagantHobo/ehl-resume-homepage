@@ -45,27 +45,23 @@ async function main() {
   const education = await Promise.all([
     prisma.education.create({
       data: {
-        resumeId: resume.id,
+        
         schoolName: 'University of California, Berkeley',
         degree: 'Bachelor of Science',
         major: 'Computer Science',
         location: 'Berkeley, CA',
         yearsAttended: '2011 - 2015',
-        graduationDate: new Date('2015-05-15'),
-        gpa: '3.8',
         order: 0,
       },
     }),
     prisma.education.create({
       data: {
-        resumeId: resume.id,
+        
         schoolName: 'Stanford University',
         degree: 'Master of Science',
         major: 'Artificial Intelligence',
         location: 'Stanford, CA',
         yearsAttended: '2015 - 2017',
-        graduationDate: new Date('2017-06-12'),
-        gpa: '3.9',
         order: 1,
       },
     }),
@@ -76,7 +72,7 @@ async function main() {
   const experiences = await Promise.all([
     prisma.experience.create({
       data: {
-        resumeId: resume.id,
+        
         company: 'Tech Innovations Inc.',
         jobTitle: 'Senior Software Engineer',
         dateRange: 'Jan 2021 - Present',
@@ -101,7 +97,7 @@ async function main() {
     }),
     prisma.experience.create({
       data: {
-        resumeId: resume.id,
+        
         company: 'StartupXYZ',
         jobTitle: 'Full-Stack Developer',
         dateRange: 'Jun 2018 - Dec 2020',
@@ -126,7 +122,7 @@ async function main() {
     }),
     prisma.experience.create({
       data: {
-        resumeId: resume.id,
+        
         company: 'Digital Solutions LLC',
         jobTitle: 'Junior Developer',
         dateRange: 'Jul 2017 - May 2018',
@@ -156,7 +152,7 @@ async function main() {
   const skills = await Promise.all([
     prisma.skill.create({
       data: {
-        resumeId: resume.id,
+        
         name: 'JavaScript/TypeScript',
         level: 9,
         hoverText: '7+ years experience',
@@ -165,7 +161,7 @@ async function main() {
     }),
     prisma.skill.create({
       data: {
-        resumeId: resume.id,
+        
         name: 'React & Next.js',
         level: 9,
         hoverText: 'Expert in modern React patterns',
@@ -174,7 +170,7 @@ async function main() {
     }),
     prisma.skill.create({
       data: {
-        resumeId: resume.id,
+        
         name: 'Node.js & Express',
         level: 8,
         hoverText: '5+ years backend development',
@@ -183,7 +179,7 @@ async function main() {
     }),
     prisma.skill.create({
       data: {
-        resumeId: resume.id,
+        
         name: 'SQL & PostgreSQL',
         level: 8,
         hoverText: 'Database design & optimization',
@@ -192,7 +188,7 @@ async function main() {
     }),
     prisma.skill.create({
       data: {
-        resumeId: resume.id,
+        
         name: 'Python',
         level: 7,
         hoverText: 'Data processing & scripting',
@@ -201,7 +197,7 @@ async function main() {
     }),
     prisma.skill.create({
       data: {
-        resumeId: resume.id,
+        
         name: 'AWS & Cloud',
         level: 7,
         hoverText: 'EC2, S3, Lambda, CloudFront',
@@ -210,7 +206,7 @@ async function main() {
     }),
     prisma.skill.create({
       data: {
-        resumeId: resume.id,
+        
         name: 'Docker & CI/CD',
         level: 7,
         hoverText: 'Container orchestration',
@@ -224,7 +220,7 @@ async function main() {
   const languages = await Promise.all([
     prisma.language.create({
       data: {
-        resumeId: resume.id,
+        
         name: 'English',
         proficiency: 'Native',
         order: 0,
@@ -232,7 +228,7 @@ async function main() {
     }),
     prisma.language.create({
       data: {
-        resumeId: resume.id,
+        
         name: 'Spanish',
         proficiency: 'Professional',
         order: 1,
@@ -245,7 +241,7 @@ async function main() {
   const certifications = await Promise.all([
     prisma.certification.create({
       data: {
-        resumeId: resume.id,
+        
         name: 'AWS Certified Solutions Architect',
         agency: 'Amazon Web Services',
         certNumber: 'AWS-12345',
@@ -256,7 +252,7 @@ async function main() {
     }),
     prisma.certification.create({
       data: {
-        resumeId: resume.id,
+        
         name: 'Professional Scrum Master I',
         agency: 'Scrum.org',
         certNumber: 'PSM-67890',
@@ -272,7 +268,7 @@ async function main() {
   const publications = await Promise.all([
     prisma.publication.create({
       data: {
-        resumeId: resume.id,
+        
         title: 'Optimizing React Performance in Large-Scale Applications',
         year: '2023',
         order: 0,
@@ -280,7 +276,7 @@ async function main() {
     }),
     prisma.publication.create({
       data: {
-        resumeId: resume.id,
+        
         title: 'Microservices Architecture: Lessons Learned',
         year: '2022',
         order: 1,
